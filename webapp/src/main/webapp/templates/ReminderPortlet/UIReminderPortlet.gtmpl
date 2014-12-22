@@ -1,0 +1,44 @@
+<%
+import org.exoplatform.portal.webui.util.Util;
+import org.exoplatform.webui.application.portlet.PortletRequestContext;
+import org.exoplatform.web.application.JavascriptManager;
+def pcontext = Util.getPortalRequestContext();
+def jsManager = pcontext.getJavascriptManager();
+jsManager.require("SHARED/reminder", "reminder").addScripts("reminder.init();");
+%>
+
+
+<style>
+#reminderPopUp{
+margin: 100px;
+display: none;
+}
+.uiPopup .uiActionBorder {
+    margin: 0;
+}
+
+.uiPopup .popupHeaderReminder {
+    padding: 10px;
+}
+</style>
+			<div id="reminderPopUp" class="UIPopupWindow uiPopup UIDragObject NormalStyle">			
+			  	<div id="reminderClose" class="popupHeaderReminder clearfix">		
+					<a onclick="" title="Close Window" class="uiIconClose pull-right"></a>		
+				</div>
+				<div class="uiContentBox">	
+					<img src="/calendar-reminder-webapp/img/coffe.png">
+					<img src="/calendar-reminder-webapp/img/itstime.png">	
+					<div id="reminderContent">					
+					</div>	
+				</div>						
+				<span class="uiCheckbox"><input id="reminderDismiss" type="checkbox" class="checkbox"><span>Do not display again</span></span>
+				<div class="uiAction uiActionBorderOK">      
+		           <button id="reminderOK" onclick="" type="button" class="btn">OK</button>       		
+        		</div>				
+			</div>
+
+
+
+
+
+
