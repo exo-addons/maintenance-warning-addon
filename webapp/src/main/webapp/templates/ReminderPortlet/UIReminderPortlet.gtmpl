@@ -10,8 +10,11 @@ jsManager.require("SHARED/reminder", "reminder").addScripts("reminder.init();");
 
 <style>
 #reminderPopUp{
-margin: 100px;
+margin: 3em;
+padding: 1em;
 display: none;
+width: 30%;
+z-index: 1;
 }
 .uiPopup .uiActionBorder {
     margin: 0;

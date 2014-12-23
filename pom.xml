@@ -8,7 +8,7 @@
     <version>4</version>
     <relativePath />
   </parent>
-  <groupId>org.exoplatform.addons.marketplace</groupId>
+  <groupId>org.exoplatform.addons.maintenancewarning</groupId>
   <artifactId>calendar-reminder</artifactId>
   <version>1.0.x-SNAPSHOT</version>
   <packaging>pom</packaging>

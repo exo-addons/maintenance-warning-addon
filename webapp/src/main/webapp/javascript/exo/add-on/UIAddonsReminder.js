@@ -57,8 +57,8 @@ reminderObj.init = function(){
                       var d = new Date();
                       var currentTime = d.getTime(); 
                       var remainingMinutes = Math.round((element.fromDate.time - currentTime)/(60*1000));
-                      var reminderDescription = splitData(element.description, remainingMinutes);
-                      gj("#reminderContent").html("" + reminderDescription);
+                      var reminderDescription = splitData(element.description );
+                      gj("#reminderContent").html("" + htmlForTextWithEmbeddedNewlines(reminderDescription, remainingMinutes ));
                       isDescriptionExist = true;
                     }
                   }
@@ -75,29 +75,23 @@ reminderObj.init = function(){
     timerReminder = setInterval(FetchData, INTERVAL_DISPLAY_POPUP * 1000);
 
   //split data JSON, get only Description, add remaining time minute
-  function splitData(data, remainingMinutes){
+  function splitData(data){
     var res1 = data.split("Description:");
     var res = res1[1].split("<br>")[0];
-      if (data.indexOf("%remaining_time%")){
-        res = res.replace("%remaining_time%", "<strong>"+remainingMinutes+"</strong>"); 
-      }
   return res;
   }
   }
 
-function htmlForTextWithEmbeddedNewlines(text) {
+function htmlForTextWithEmbeddedNewlines(text, remainingMinutes) {
     var htmls = [];
     var lines = text.split(/\n/);
-    // The temporary <div/> is to perform HTML entity encoding reliably.
-    //
-    // document.createElement() is *much* faster than jQuery('<div></div>')
-    // http://stackoverflow.com/questions/268490/
-    //
-    // You don't need jQuery but then you need to struggle with browser
-    // differences in innerText/textContent yourself
     var tmpDiv = gj(document.createElement('div'));
     for (var i = 0 ; i < lines.length ; i++) {
-        htmls.push(tmpDiv.text(lines[i]).html());
+        var text = tmpDiv.text(lines[i]).html();
+      if (text.indexOf("%remaining_time%")){
+        text = text.replace("%remaining_time%", "<strong>"+remainingMinutes+"</strong>"); 
+      }
+        htmls.push(text);
     }
     return htmls.join("<br>");
 }
