@@ -29,8 +29,8 @@ z-index: 1;
 					<a onclick="" title="Close Window" class="uiIconClose pull-right"></a>		
 				</div>
 				<div class="uiContentBox">	
-					<img src="/calendar-reminder-webapp/img/coffe.png">
-					<img src="/calendar-reminder-webapp/img/itstime.png">	
+					<img src="/maintenance-warning-addon-webapp/img/coffe.png">
+					<img src="/maintenance-warning-addon-webapp/img/itstime.png">	
 					<div id="reminderContent">					
 					</div>	
 				</div>						

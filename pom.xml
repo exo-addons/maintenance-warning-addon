@@ -9,11 +9,11 @@
     <relativePath />
   </parent>
   <groupId>org.exoplatform.addons.maintenancewarning</groupId>
-  <artifactId>calendar-reminder</artifactId>
+  <artifactId>maintenance-warning-addon</artifactId>
   <version>1.0.x-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>Calendar Reminder</name>
-  <description>Calendar Reminder</description>
+  <name>Maintenance Warning Addons</name>
+  <description>Maintenance Warning Addons</description>
   <modules>
     <module>lib</module>
     <module>config</module>
@@ -21,10 +21,10 @@
     <module>bundle</module>
   </modules>
   <scm>
-    <connection>scm:git:git://github.com/exo-addons/calendar-reminder.git</connection>
-    <developerConnection>scm:git:git@github.com:exo-addons/calendar-reminder.git</developerConnection>
+    <connection>scm:git:git://github.com/exo-addons/maintenance-warning-addon.git</connection>
+    <developerConnection>scm:git:git@github.com:exo-addons/maintenance-warning-addon.git</developerConnection>
     <tag>HEAD</tag>
-    <url>https://github.com/exo-addons/calendar-reminder.git</url>
+    <url>https://github.com/exo-addons/maintenance-warning-addon.git</url>
   </scm>
   <properties>
     <exoplatform.version>4.1.0-RC1</exoplatform.version>

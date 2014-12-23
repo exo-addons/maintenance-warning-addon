@@ -20,6 +20,7 @@ reminderObj.init = function(){
     //http://localhost:8080/rest/reminderservice/call
     var callURL = "http://"+configuration.serverURL + configuration.spaceServicePath;
     var timerReminder;
+    var remainingMinutes; 
 
 
     //close popup then repeat after timer interval 
@@ -56,7 +57,7 @@ reminderObj.init = function(){
                     {
                       var d = new Date();
                       var currentTime = d.getTime(); 
-                      var remainingMinutes = Math.round((element.fromDate.time - currentTime)/(60*1000));
+                      remainingMinutes = Math.round((element.fromDate.time - currentTime)/(60*1000));
                       var reminderDescription = splitData(element.description );
                       gj("#reminderContent").html("" + htmlForTextWithEmbeddedNewlines(reminderDescription, remainingMinutes ));
                       isDescriptionExist = true;
@@ -67,9 +68,13 @@ reminderObj.init = function(){
 		      });
 
           //if checkbox and description exist
-          if (!gj('input#reminderDismiss').is(':checked') && isDescriptionExist) {gj("#reminderPopUp").show();}  
-          else{ //gj("#reminderPopUp").hide();
-          }        
+          if(remainingMinutes > 0){
+          if (!gj('input#reminderDismiss').is(':checked') && isDescriptionExist) {gj("#reminderPopUp").show();} 
+          }
+          else{
+           gj("#reminderPopUp").hide();
+          }
+             
         }
       }
     timerReminder = setInterval(FetchData, INTERVAL_DISPLAY_POPUP * 1000);

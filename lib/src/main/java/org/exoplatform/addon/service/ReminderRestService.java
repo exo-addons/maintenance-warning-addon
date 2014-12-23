@@ -102,7 +102,7 @@ public class ReminderRestService implements ResourceContainer {
 	    		Collection<CalendarEvent> calendarCollection = calendarService.buildSeries(baseResultEvent, timeCurrentBefore1Hour, timeCurrentAfter1Hour, username);
 	    		Iterator<CalendarEvent> iteratorCalendar = calendarCollection.iterator();
 	    		
-	    		log.info("=======REPEAT EVENT=======");
+//	    		log.info("=======REPEAT EVENT=======");
 	    		while(iteratorCalendar.hasNext()){
 	    			CalendarEvent calendarRepeat = iteratorCalendar.next();
 	    	    	List<Reminder> listReminder = calendarRepeat.getReminders();
@@ -114,7 +114,7 @@ public class ReminderRestService implements ResourceContainer {
 	    	}
 	    	/*if not repeat, check only event +-1h*/		    	
 	    	else{		    		
-	    		log.info("=======NOT REPEAT EVENT=======");
+//	    		log.info("=======NOT REPEAT EVENT=======");
     	    	List<Reminder> listReminder = baseResultEvent.getReminders();
     	    	for (Reminder reminderItem : listReminder){	    	    		
     	    		reminderItem.setFromDateTime(baseResultEvent.getFromDateTime());

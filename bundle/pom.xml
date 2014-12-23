@@ -2,30 +2,30 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-  <artifactId>calendar-reminder</artifactId>
+  <artifactId>maintenance-warning-addon</artifactId>
     <groupId>org.exoplatform.addons.maintenancewarning</groupId>
     <version>1.0.x-SNAPSHOT</version>
   </parent>
-  <artifactId>calendar-reminder-bundle</artifactId>
+  <artifactId>maintenance-warning-addon-bundle</artifactId>
   <packaging>jar</packaging>
-  <name>Calendar Reminder - Bundle</name>
-  <description>Calendar Reminder - Bundle</description>
+  <name>Maintenance Warning Addons - Bundle</name>
+  <description>Maintenance Warning Addons - Bundle</description>
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>calendar-reminder-config</artifactId>
+      <artifactId>maintenance-warning-addon-config</artifactId>
       <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>calendar-reminder-lib</artifactId>
+      <artifactId>maintenance-warning-addon-lib</artifactId>
       <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>calendar-reminder-webapp</artifactId>
+      <artifactId>maintenance-warning-addon-webapp</artifactId>
       <version>${project.version}</version>
       <type>war</type>
       <scope>provided</scope>

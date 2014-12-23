@@ -46,12 +46,12 @@
         </value-param>
         <object-param>
           <name>MaintenanceReminder</name>
-          <description>Calendar Reminder Portlet</description>
+          <description>Maintenance Warning Portlet</description>
           <object type="org.exoplatform.portal.config.serialize.PortletApplication">
             <field name="state">
               <object type="org.exoplatform.portal.config.model.TransientApplicationState">
                 <field name="contentId">
-                  <string>calendar-reminder-webapp/CalendarReminderPortlet</string>
+                  <string>maintenance-warning-addon-webapp/MaintenanceWarningPortlet</string>
                 </field>
               </object>
             </field>

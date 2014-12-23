@@ -25,9 +25,9 @@
 
   <!-- AddOn Portlet -->
   <portlet>
-    <description xml:lang="EN">Calendar Reminder Portlet</description>
-    <portlet-name>CalendarReminderPortlet</portlet-name>
-    <display-name xml:lang="EN">Calendar Reminder Portlet</display-name>
+    <description xml:lang="EN">Maintenance Warning Portlet</description>
+    <portlet-name>MaintenanceWarningPortlet</portlet-name>
+    <display-name xml:lang="EN">Maintenance Warning Portlet</display-name>
     <portlet-class>org.exoplatform.webui.application.portlet.PortletApplicationController</portlet-class>    
     <init-param>
       <name>webui.configuration</name>
@@ -40,9 +40,9 @@
     <supported-locale>en</supported-locale>
     <resource-bundle>locale.portlet.addon.AddOnReminderPortlet</resource-bundle>
     <portlet-info>
-      <title>Calendar Reminder Portlet</title>
-      <short-title>Calendar Reminder Portlet</short-title>  
-      <keywords>calendar-reminder-webapp</keywords>
+      <title>Maintenance Warning Portlet</title>
+      <short-title>Maintenance Warning Portlet</short-title>  
+      <keywords>maintenance-warning-addon-webapp</keywords>
     </portlet-info>
   </portlet>  
 

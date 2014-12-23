@@ -11,10 +11,10 @@
 			<useProjectArtifact>false</useProjectArtifact>
 			<outputDirectory>/</outputDirectory>
 			<includes>
-				<include>${project.groupId}:calendar-reminder-webapp:war</include>
+				<include>${project.groupId}:maintenance-warning-addon-webapp:war</include>
 			</includes>
 			<scope>provided</scope>
-			<outputFileNameMapping>calendar-reminder-webapp.war</outputFileNameMapping>
+			<outputFileNameMapping>maintenance-warning-addon-webapp.war</outputFileNameMapping>
 		</dependencySet>
 		<!-- Libraries -->
 		<dependencySet>

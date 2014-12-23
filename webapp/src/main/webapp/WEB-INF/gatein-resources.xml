@@ -24,15 +24,15 @@
     xmlns="http://www.gatein.org/xml/ns/gatein_resources_1_3">
 
   <portlet-skin>
-    <application-name>calendar-reminder-webapp</application-name>
-    <portlet-name>CalendarReminderPortlet</portlet-name>
+    <application-name>maintenance-warning-addon-webapp</application-name>
+    <portlet-name>MaintenanceWarningPortlet</portlet-name>
     <skin-name>Default</skin-name>
     <css-path>/skin/css/add-ons.css</css-path>
     <css-priority>1</css-priority>
   </portlet-skin>
 
   <portlet>
-    <name>CalendarReminderPortlet</name>
+    <name>MaintenanceWarningPortlet</name>
      <module>
    		<depends>
     		<module>reminder</module>
