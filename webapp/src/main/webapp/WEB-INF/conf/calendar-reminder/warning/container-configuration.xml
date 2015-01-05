@@ -34,15 +34,11 @@
       <init-params>
         <value-param>
           <name>priority</name>
-          <value>500</value>
+          <value>7</value>
         </value-param>
         <value-param>
           <name>containerName</name>
           <value>left-topNavigation-container</value>
-<!--
-          <value>AdminToolBarPortlet</value>
--->
-
         </value-param>
         <object-param>
           <name>MaintenanceReminder</name>
