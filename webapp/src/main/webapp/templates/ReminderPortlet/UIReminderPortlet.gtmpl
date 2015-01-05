@@ -14,7 +14,7 @@ margin: 3em;
 padding: 1em;
 display: none;
 width: 30%;
-z-index: 1;
+z-index: 5;
 }
 .uiPopup .uiActionBorder {
     margin: 0;

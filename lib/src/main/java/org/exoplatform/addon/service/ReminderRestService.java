@@ -40,7 +40,7 @@ public class ReminderRestService implements ResourceContainer {
 	//check after and before 1 hour
 	private static final int HOUR_BEFORE = 1;
 	//default is 5 minutes
-	private static long DEFAULT_REPEAT_INTERVAL_MINUTE = 5*60*1000;	
+//	private static long DEFAULT_REPEAT_INTERVAL_MINUTE = 5*60*1000;	
 	
 	  private static final CacheControl cacheControl;
 	  static {
@@ -102,7 +102,7 @@ public class ReminderRestService implements ResourceContainer {
 	    		Collection<CalendarEvent> calendarCollection = calendarService.buildSeries(baseResultEvent, timeCurrentBefore1Hour, timeCurrentAfter1Hour, username);
 	    		Iterator<CalendarEvent> iteratorCalendar = calendarCollection.iterator();
 	    		
-//	    		log.info("=======REPEAT EVENT=======");
+	    		log.debug("=======REPEAT EVENT=======");
 	    		while(iteratorCalendar.hasNext()){
 	    			CalendarEvent calendarRepeat = iteratorCalendar.next();
 	    	    	List<Reminder> listReminder = calendarRepeat.getReminders();
@@ -114,7 +114,7 @@ public class ReminderRestService implements ResourceContainer {
 	    	}
 	    	/*if not repeat, check only event +-1h*/		    	
 	    	else{		    		
-//	    		log.info("=======NOT REPEAT EVENT=======");
+	    		log.debug("=======NOT REPEAT EVENT=======");
     	    	List<Reminder> listReminder = baseResultEvent.getReminders();
     	    	for (Reminder reminderItem : listReminder){	    	    		
     	    		reminderItem.setFromDateTime(baseResultEvent.getFromDateTime());
@@ -142,15 +142,12 @@ public class ReminderRestService implements ResourceContainer {
 			Boolean after = timeCurrent.getTime().before(reminderItem.getFromDateTime());		
 			//if time alarm before < current time < time reminder, we display popup
 			if (before && after){    	    				
-//				log.info("======= DISPLAY REMINDER POPUP=======");
-//				log.info(" at "+reminderItem.getFromDateTime() +" before: " + reminderItem.getAlarmBefore()+"m "+reminderItem.getDescription() );
-				//repeat intervall to display popup
-				DEFAULT_REPEAT_INTERVAL_MINUTE = reminderItem.getRepeatInterval();
+				log.debug("======= DISPLAY REMINDER POPUP=======");
+				log.debug(reminderItem.getDescription());
 				if (reminderItem.getFromDateTime() != null){
 				msgReminder.setFromDate(reminderItem.getFromDateTime());
 				msgReminder.setToDate(new Date());
 				msgReminder.setDescription(reminderItem.getDescription());
-//				log.info(reminderItem.getDescription());
 				msgReminder.setSummary(reminderItem.getSummary());
 				msgReminder.setRepeatIntervalMinute(reminderItem.getRepeatInterval());
 				}

@@ -34,7 +34,7 @@ reminderObj.init = function(){
     gj("#reminderOK").click(function() {
        gj("#reminderPopUp").hide();
        clearInterval(timerReminder);
-        timerReminder = setInterval(FetchData, INTERVAL_DISPLAY_POPUP * 1000);
+       timerReminder = setInterval(FetchData, INTERVAL_DISPLAY_POPUP * 1000);
        if (gj('input#reminderDismiss').is(':checked')) {
         isPopUpActivate = false;
         }
@@ -55,6 +55,8 @@ reminderObj.init = function(){
                   {
                   if (element.description)
                     {
+                      //update INTERVAL
+                      INTERVAL_DISPLAY_POPUP = element.repeatIntervalMinute * 60;
                       var d = new Date();
                       var currentTime = d.getTime(); 
                       remainingMinutes = Math.round((element.fromDate.time - currentTime)/(60*1000));
