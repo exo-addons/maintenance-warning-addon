@@ -25,14 +25,14 @@ reminderObj.init = function(){
 
     //close popup then repeat after timer interval 
     gj(".uiIconClose").click(function() {
-    gj("#reminderPopUp").hide();
+    gj("#blockPopUp").hide();
     clearInterval(timerReminder);
     timerReminder = setInterval(FetchData, INTERVAL_DISPLAY_POPUP * 1000);
     });
 
 
     gj("#reminderOK").click(function() {
-       gj("#reminderPopUp").hide();
+       gj("#blockPopUp").hide();
        clearInterval(timerReminder);
        timerReminder = setInterval(FetchData, INTERVAL_DISPLAY_POPUP * 1000);
        if (gj('input#reminderDismiss').is(':checked')) {
@@ -48,7 +48,7 @@ reminderObj.init = function(){
 			      url: callURL,   
             dataType: 'json',
             error : function(){
-            gj("#reminderPopUp").hide();
+            gj("#blockPopUp").hide();
             },
 		       	success : function(data) {                 
                 gj.each(data, function(index, element) 
@@ -71,10 +71,10 @@ reminderObj.init = function(){
 
           //if checkbox and description exist
           if(remainingMinutes > 0){
-          if (!gj('input#reminderDismiss').is(':checked') && isDescriptionExist) {gj("#reminderPopUp").show();} 
+          if (!gj('input#reminderDismiss').is(':checked') && isDescriptionExist) {gj("#blockPopUp").show();} 
           }
           else{
-           gj("#reminderPopUp").hide();
+           gj("#blockPopUp").hide();
           }
              
         }
@@ -96,7 +96,9 @@ function htmlForTextWithEmbeddedNewlines(text, remainingMinutes) {
     for (var i = 0 ; i < lines.length ; i++) {
         var text = tmpDiv.text(lines[i]).html();
       if (text.indexOf("%remaining_time%")){
-        text = text.replace("%remaining_time%", "<strong>"+remainingMinutes+"</strong>"); 
+        text = text.replace("%remaining_time%", "<p class='center'><span class='minutes'>"+remainingMinutes+"</span> minutes</p>"); 
+
+
       }
         htmls.push(text);
     }

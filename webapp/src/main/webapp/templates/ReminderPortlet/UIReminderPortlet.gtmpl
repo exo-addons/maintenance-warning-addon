@@ -9,36 +9,70 @@ jsManager.require("SHARED/reminder", "reminder").addScripts("reminder.init();");
 
 
 <style>
-#reminderPopUp{
-margin: 3em;
-padding: 1em;
-display: none;
-width: 30%;
-z-index: 5;
+
+#reminderPopUp {
+    display: block;
+    left: 50%;
+    margin:0 0 0 -245px;
+    padding: 15px;
+    position: absolute;
+    top: 100px;
+    width: 30%;
+    z-index: 5;
+	width: 460px;
+	background:  #fbfbfb;
+	border: none;
 }
-.uiPopup .uiActionBorder {
-    margin: 0;
+#reminderPopUp .popupHeaderReminder {
+    padding: 0;
+	cursor:pointer;
+}
+.mark-layer{
+	background: rgba(0, 0, 0, 0.3);
+    display: block;
+    height: 100%;
+    left: 0;
+    position: fixed;
+    top: 0;
+	z-index: 9991;
+    width: 100%;
 }
 
-.uiPopup .popupHeaderReminder {
-    padding: 10px;
+.reminderContent .uiCheckbox {
+    margin-left: 0;
+}
+
+.reminderContent  .minutes {
+    font-size: 24px;
+}
+.reminderContent .media > .pull-left {
+    margin-right: 20px;
 }
 </style>
-			<div id="reminderPopUp" class="UIPopupWindow uiPopup UIDragObject NormalStyle">			
-			  	<div id="reminderClose" class="popupHeaderReminder clearfix">		
-					<a onclick="" title="Close Window" class="uiIconClose pull-right"></a>		
+<div id="blockPopUp" style="width: 100%; height: 100%; display: none; position: fixed; background: none repeat scroll 0px 0px rgba(0, 0, 0, 0.3); top: 0px; left: 0px; z-index: 9991;" class="mark-layer">
+<div class="UIPopupWindow uiPopup UIDragObject NormalStyle" id="reminderPopUp" style="display: block;">			
+		<div class="popupHeaderReminder clearfix" id="reminderClose">		
+			<a class="uiIconClose pull-right" title="Close Window" onclick=""></a>		
+		</div>
+		<div class="uiContentBox">
+			<div class="media">	
+			<img src="/maintenance-warning-addon-webapp/img/coffee.png" class="pull-left">
+			<div class="media-body">
+			<img src="/maintenance-warning-addon-webapp/img/itstime.png">	
+				<div id="reminderContent" class="reminderContent">
+				</div>	
+				<p>
+					<span class="uiCheckbox"><input type="checkbox" id="reminderDismiss" class="checkbox"><span>Do not display again</span></span>
+				</p>
 				</div>
-				<div class="uiContentBox">	
-					<img src="/maintenance-warning-addon-webapp/img/coffe.png">
-					<img src="/maintenance-warning-addon-webapp/img/itstime.png">	
-					<div id="reminderContent">					
-					</div>	
-				</div>						
-				<span class="uiCheckbox"><input id="reminderDismiss" type="checkbox" class="checkbox"><span>Do not display again</span></span>
-				<div class="uiAction uiActionBorderOK">      
-		           <button id="reminderOK" onclick="" type="button" class="btn">OK</button>       		
-        		</div>				
 			</div>
+		</div>						
+		
+		<div class="uiAction uiActionBorderOK">      
+		   <button class="btn" type="button" onclick="" id="reminderOK">OK</button>       		
+		</div>				
+	</div>
+</div>
 
 
 
