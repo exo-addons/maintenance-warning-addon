@@ -41,7 +41,7 @@
           <value>left-topNavigation-container</value>
         </value-param>
         <object-param>
-          <name>MaintenanceReminder</name>
+          <name>MaintenanceWarningPortlet</name>
           <description>Maintenance Warning Portlet</description>
           <object type="org.exoplatform.portal.config.serialize.PortletApplication">
             <field name="state">
