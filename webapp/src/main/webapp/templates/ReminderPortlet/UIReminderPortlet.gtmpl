@@ -7,7 +7,6 @@ def jsManager = pcontext.getJavascriptManager();
 jsManager.require("SHARED/reminder", "reminder").addScripts("reminder.init();");
 %>
 
-
 <style>
 
 #reminderPopUp {

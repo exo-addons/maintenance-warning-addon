@@ -42,12 +42,26 @@
       </depends>
     </module>
   </portlet>
+
+  <module>
+    <name>cookie</name>
+    <script>
+      <path>/javascript/exo/add-on/jquery.cookie.js</path>
+    </script>
+    <depends>
+      <module>jquery</module>
+      <as>gj</as>
+    </depends>
+  </module>
   
   <module>
     <name>reminder</name>
     <script>
       <path>/javascript/exo/add-on/UIAddonsReminder.js</path>
     </script>
+    <depends>
+      <module>cookie</module>
+    </depends>
     <depends>
       <module>ecm-bootstrap</module>
     </depends>
@@ -59,4 +73,7 @@
       <module>wcm-utils</module>
     </depends>
   </module>
+
+
+
 </gatein-resources>
