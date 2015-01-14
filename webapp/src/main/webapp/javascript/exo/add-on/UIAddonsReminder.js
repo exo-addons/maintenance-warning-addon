@@ -22,10 +22,7 @@ reminderObj.init = function(){
     var timerReminder;
     var remainingMinutes; 
 
-
-
-
-    function FetchData() 
+    var func = function FetchData() 
       {
       if (isPopUpActivate)
         {
@@ -49,7 +46,7 @@ reminderObj.init = function(){
                       remainingMinutes = Math.round((element.fromDate.time - currentTime)/(60*1000));
                       var reminderDescription = splitData(element.description );
                       isDescriptionExist = true;
-                      storeCookies(reminderDescription, element.fromDate.time ,remainingMinutes, isDescriptionExist, inputHidden, timerReminder, INTERVAL_DISPLAY_POPUP );
+                      storeCookies(reminderDescription, element.fromDate.time ,remainingMinutes, isDescriptionExist, inputHidden, timerReminder, INTERVAL_DISPLAY_POPUP, func );
                     }
                   }
                 );
@@ -60,7 +57,7 @@ reminderObj.init = function(){
 
 
 
-    timerReminder = setInterval(function(){ FetchData() }, INTERVAL_DISPLAY_POPUP * 1000);
+    timerReminder = setInterval(func, INTERVAL_DISPLAY_POPUP * 1000);
 
   //split data JSON, get only Description, add remaining time minute
   function splitData(data)
@@ -71,9 +68,8 @@ reminderObj.init = function(){
     }
   }
 
-
     //search on cookie, if reminder--time is true, display the popup
-    function storeCookies(reminderDescription, time, remainingMinutes, isDescriptionExist, inputHidden, timerReminder, INTERVAL_DISPLAY_POPUP )
+    function storeCookies(reminderDescription, time, remainingMinutes, isDescriptionExist, inputHidden, timerReminder, INTERVAL_DISPLAY_POPUP, func )
       {
         //if cookie is true, display the popup with correct description, otherwise don't
         if (typeof gj.cookie("reminder--"+time) === 'undefined') {
@@ -118,7 +114,7 @@ reminderObj.init = function(){
 
                      var idS = "#"+id;
                      gj("#block").append(strVar);
-                     createScript(time, timerReminder, INTERVAL_DISPLAY_POPUP);
+                     createScript(time, timerReminder, INTERVAL_DISPLAY_POPUP, func);
                      gj(idS).show();
                     }
                 }
@@ -130,7 +126,7 @@ reminderObj.init = function(){
         }
       }
 
-function createScript(time, timerReminder, INTERVAL_DISPLAY_POPUP){
+function createScript(time, timerReminder, INTERVAL_DISPLAY_POPUP, func){
     var idOK = "#reminderOK"+time;
     var idClose = "#reminderClose"+time;
     var idPopUp = "#reminderContent-"+time;
@@ -149,16 +145,14 @@ function createScript(time, timerReminder, INTERVAL_DISPLAY_POPUP){
 
        gj(idPopUp).hide();
        clearInterval(timerReminder);
-
-
-       timerReminder = setInterval(function(){ FetchData() }, INTERVAL_DISPLAY_POPUP * 1000);
+       timerReminder = setInterval(func, INTERVAL_DISPLAY_POPUP * 1000);
     });
 
     //close popup then repeat after timer interval 
     gj(idClose).click(function() {
     gj(idPopUp).hide();
     clearInterval(timerReminder);
-    timerReminder = setInterval(function(){ FetchData() }, INTERVAL_DISPLAY_POPUP * 1000);
+    timerReminder = setInterval(func, INTERVAL_DISPLAY_POPUP * 1000);
     });
 }
 
