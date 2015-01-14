@@ -48,32 +48,8 @@ jsManager.require("SHARED/reminder", "reminder").addScripts("reminder.init();");
     margin-right: 20px;
 }
 </style>
-<div id="blockPopUp" style="width: 100%; height: 100%; display: none; position: fixed; background: none repeat scroll 0px 0px rgba(0, 0, 0, 0.3); top: 0px; left: 0px; z-index: 9991;" class="mark-layer">
-<div class="UIPopupWindow uiPopup UIDragObject NormalStyle" id="reminderPopUp" style="display: block;">			
-		<div class="popupHeaderReminder clearfix" id="reminderClose">		
-			<a class="uiIconClose pull-right" title="Close Window" onclick=""></a>		
-		</div>
-		<div class="uiContentBox">
-			<div class="media">	
-			<img src="/maintenance-warning-addon-webapp/img/coffee.png" class="pull-left">
-			<div class="media-body">
-			<img src="/maintenance-warning-addon-webapp/img/itstime.png">	
-				<div id="reminderContent" class="reminderContent">
-				</div>	
-				<p>
-					<span class="uiCheckbox"><input type="checkbox" id="reminderDismiss" class="checkbox"><span>Do not display again</span></span>
-				</p>
-				</div>
-			</div>
-		</div>						
-		
-		<div class="uiAction uiActionBorderOK">      
-		   <button class="btn" type="button" onclick="" id="reminderOK">OK</button>       		
-		</div>				
-	</div>
+<div id="block">
 </div>
-
-
 
 
 

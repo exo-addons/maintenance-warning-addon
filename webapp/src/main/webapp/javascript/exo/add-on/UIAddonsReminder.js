@@ -14,7 +14,7 @@ reminderObj.init = function(){
     }
 
     // interval seconds
-    var INTERVAL_DISPLAY_POPUP = 15;
+    var INTERVAL_DISPLAY_POPUP = 15*4*5;
     var isPopUpActivate = true;
     var isDescriptionExist = false;
     //http://localhost:8080/rest/reminderservice/call
@@ -24,28 +24,6 @@ reminderObj.init = function(){
 
 
 
-
-    //close popup then repeat after timer interval 
-    gj(".uiIconClose").click(function() {
-    gj("#blockPopUp").hide();
-    clearInterval(timerReminder);
-    timerReminder = setInterval(FetchData, INTERVAL_DISPLAY_POPUP * 1000);
-    });
-
-
-    gj("#reminderOK").click(function() {
-       gj("#blockPopUp").hide();
-       clearInterval(timerReminder);
-       timerReminder = setInterval(FetchData, INTERVAL_DISPLAY_POPUP * 1000);
-       var valueInput= "reminder--"+gj("#reminderContent input" ).val();  
-       if (gj('input#reminderDismiss').is(':checked')) {
-        isPopUpActivate = true;
-        gj.cookie(valueInput, false);
-        }
-        else{
-        isPopUpActivate = true;
-        }
-    });
 
     function FetchData() 
       {
@@ -57,35 +35,32 @@ reminderObj.init = function(){
             error : function(){
             gj("#blockPopUp").hide();
             },
-		       	success : function(data) {                 
+		       	success : function(data) {     
+                gj("#block").html("");            
                 gj.each(data, function(index, element) 
                   {
                   if (element.description)
                     {
                       //update INTERVAL
-                      //INTERVAL_DISPLAY_POPUP = element.repeatIntervalMinute * 60;
+                      INTERVAL_DISPLAY_POPUP = element.repeatIntervalMinute * 60;
                       var d = new Date();
                       var currentTime = d.getTime(); 
                       var inputHidden ="<input type='hidden' value="+element.fromDate.time+" id="+element.fromDate.time+" />";
                       remainingMinutes = Math.round((element.fromDate.time - currentTime)/(60*1000));
                       var reminderDescription = splitData(element.description );
                       isDescriptionExist = true;
-                      storeCookies(reminderDescription, element.fromDate.time ,remainingMinutes, isDescriptionExist, inputHidden );
+                      storeCookies(reminderDescription, element.fromDate.time ,remainingMinutes, isDescriptionExist, inputHidden, timerReminder, INTERVAL_DISPLAY_POPUP );
                     }
                   }
                 );
 		       	}
 		      });
-
-
-
-
         }
       }
 
 
 
-    timerReminder = setInterval(FetchData, INTERVAL_DISPLAY_POPUP * 1000);
+    timerReminder = setInterval(function(){ FetchData() }, INTERVAL_DISPLAY_POPUP * 1000);
 
   //split data JSON, get only Description, add remaining time minute
   function splitData(data)
@@ -98,7 +73,7 @@ reminderObj.init = function(){
 
 
     //search on cookie, if reminder--time is true, display the popup
-    function storeCookies(reminderDescription, time, remainingMinutes, isDescriptionExist, inputHidden )
+    function storeCookies(reminderDescription, time, remainingMinutes, isDescriptionExist, inputHidden, timerReminder, INTERVAL_DISPLAY_POPUP )
       {
         //if cookie is true, display the popup with correct description, otherwise don't
         if (typeof gj.cookie("reminder--"+time) === 'undefined') {
@@ -107,23 +82,85 @@ reminderObj.init = function(){
         else{
 
                 if (gj.cookie("reminder--"+time) == 'true'){
-                console.log("DISPLAY popupW "+"reminder--"+time + ">>"+ gj.cookie("reminder--"+time) );
 
                 if(remainingMinutes > 0 && isDescriptionExist )
                     {
-                     console.log(remainingMinutes +"---"+ !gj('input#reminderDismiss').is(':checked') +"--"+ isDescriptionExist );
-                     gj("#reminderContent").html(""+htmlForTextWithEmbeddedNewlines(reminderDescription,remainingMinutes) + inputHidden);
-                     gj('input#reminderDismiss').prop('checked', false);
-                     gj("#blockPopUp").show();
+
+                      var id = "reminderContent-"+time;
+                      var text = ""+htmlForTextWithEmbeddedNewlines(reminderDescription,remainingMinutes) + inputHidden;
+                      var strVar="";
+
+                      strVar += "<div id='"+id+"' style=\"width: 100%; height: 100%; display: none; position: fixed; background: none repeat scroll 0px 0px rgba(0, 0, 0, 0.3); top: 0px; left: 0px; z-index: 9991;\" class=\"mark-layer\">";
+                      strVar += "<div class=\"UIPopupWindow uiPopup UIDragObject NormalStyle\" id=\"reminderPopUp\" style=\"display: block;\">			";
+                      strVar += "		<div class=\"popupHeaderReminder clearfix\" >";
+                      strVar += "			<a class=\"uiIconClose pull-right\" id=\"reminderClose"+time+"\" title=\"Close Window\" onclick=\"\"><\/a>		";
+                      strVar += "		<\/div>";
+                      strVar += "		<div class=\"uiContentBox\">";
+                      strVar += "			<div class=\"media\">	";
+                      strVar += "			<img src=\"\/maintenance-warning-addon-webapp\/img\/coffee.png\" class=\"pull-left\">";
+                      strVar += "			<div class=\"media-body\">";
+                      strVar += "			<img src=\"\/maintenance-warning-addon-webapp\/img\/itstime.png\">	";
+                      strVar += "				<div id=\"reminderContent\" class=\"reminderContent\">";
+                      strVar += text;
+                      strVar += "				<\/div>	";
+                      strVar += "				<p>";
+                      strVar += "					<span class=\"uiCheckbox\"><input type=\"checkbox\" id=\"reminderDismiss"+time+"\" value=\""+time+"\" class=\"checkbox\"><span>Do not display again<\/span><\/span>";
+                      strVar += "				<\/p>";
+                      strVar += "				<\/div>";
+                      strVar += "			<\/div>";
+                      strVar += "		<\/div>						";
+                      strVar += "		";
+                      strVar += "		<div class=\"uiAction uiActionBorderOK\">      ";
+                      strVar += "		   <button class=\"btn\" type=\"button\" onclick=\"\" id=\"reminderOK"+time+"\">OK<\/button>       		";
+                      strVar += "		<\/div>				";
+                      strVar += "	<\/div>";
+                      strVar += "<\/div>";
+
+                     var idS = "#"+id;
+                     gj("#block").append(strVar);
+                     createScript(time, timerReminder, INTERVAL_DISPLAY_POPUP);
+                     gj(idS).show();
                     }
                 }
                 else{
-                    console.log(remainingMinutes +"---"+ !gj('input#reminderDismiss').is(':checked') +"--"+ isDescriptionExist );
-                    console.log("DON'T DISPLAYTRUW "+"reminder--"+time +">>"+ gj.cookie("reminder--"+time) );
+
+            //        console.log(remainingMinutes +"---"+ !gj('input#reminderDismiss').is(':checked') +"--"+ isDescriptionExist );
+           //         console.log("DON'T DISPLAYTRUW "+"reminder--"+time +">>"+ gj.cookie("reminder--"+time) );
                 }           
         }
-
       }
+
+function createScript(time, timerReminder, INTERVAL_DISPLAY_POPUP){
+    var idOK = "#reminderOK"+time;
+    var idClose = "#reminderClose"+time;
+    var idPopUp = "#reminderContent-"+time;
+    gj(idOK).click(function() {
+       
+       var valueInput= "#reminderDismiss"+time;  
+       var valueReminder= "reminder--"+time;  
+
+      if (gj(valueInput).is(':checked')) {
+        isPopUpActivate = true;
+        gj.cookie(valueReminder, false);
+        }
+        else{
+        isPopUpActivate = true;
+        }
+
+       gj(idPopUp).hide();
+       clearInterval(timerReminder);
+
+
+       timerReminder = setInterval(function(){ FetchData() }, INTERVAL_DISPLAY_POPUP * 1000);
+    });
+
+    //close popup then repeat after timer interval 
+    gj(idClose).click(function() {
+    gj(idPopUp).hide();
+    clearInterval(timerReminder);
+    timerReminder = setInterval(function(){ FetchData() }, INTERVAL_DISPLAY_POPUP * 1000);
+    });
+}
 
 function htmlForTextWithEmbeddedNewlines(text, remainingMinutes) {
     var htmls = [];
