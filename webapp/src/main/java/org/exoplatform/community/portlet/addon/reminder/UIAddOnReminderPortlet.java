@@ -23,9 +23,8 @@ import org.exoplatform.webui.core.UIPortletApplication;
 import org.exoplatform.webui.core.lifecycle.UIApplicationLifecycle;
 
 @ComponentConfig(lifecycle = UIApplicationLifecycle.class, template = "app:/templates/ReminderPortlet/UIReminderPortlet.gtmpl")
-
 public class UIAddOnReminderPortlet extends UIPortletApplication {
-	public UIAddOnReminderPortlet() throws Exception {	
+	public UIAddOnReminderPortlet() throws Exception {
 	}
-	
+
 }

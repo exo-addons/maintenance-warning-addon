@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
 
     Copyright (C) 2003-2013 eXo Platform SAS.
@@ -19,61 +19,52 @@
     02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
 -->
-<gatein-resources xmlns="http://www.gatein.org/xml/ns/gatein_resources_1_3"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://www.gatein.org/xml/ns/gatein_resources_1_3 http://www.gatein.org/xml/ns/gatein_resources_1_3">
-  
-  <portlet-skin>
-    <application-name>maintenance-warning-addon-webapp</application-name>
-    <portlet-name>MaintenanceWarningPortlet</portlet-name>
-    <skin-name>Default</skin-name>
-    <css-path>/skin/css/add-ons.css</css-path>
-    <css-priority>1</css-priority>
-  </portlet-skin>
-  
-  <portlet>
-    <name>MaintenanceWarningPortlet</name>
-    <module>
+<gatein-resources xmlns="http://www.gatein.org/xml/ns/gatein_resources_1_3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.gatein.org/xml/ns/gatein_resources_1_3 http://www.gatein.org/xml/ns/gatein_resources_1_3">
+   <portlet-skin>
+      <application-name>maintenance-warning-addon-webapp</application-name>
+      <portlet-name>MaintenanceWarningPortlet</portlet-name>
+      <skin-name>Default</skin-name>
+      <css-path>/skin/css/add-ons.css</css-path>
+      <css-priority>1</css-priority>
+   </portlet-skin>
+   <portlet>
+      <name>MaintenanceWarningPortlet</name>
+      <module>
+         <depends>
+            <module>reminder</module>
+         </depends>
+         <depends>
+            <module>portalControl</module>
+         </depends>
+      </module>
+   </portlet>
+   <module>
+      <name>cookie</name>
+      <script>
+         <path>/javascript/exo/add-on/jquery.cookie.js</path>
+      </script>
       <depends>
-        <module>reminder</module>
+         <module>jquery</module>
+         <as>gj</as>
+      </depends>
+   </module>
+   <module>
+      <name>reminder</name>
+      <script>
+         <path>/javascript/exo/add-on/UIAddonsReminder.js</path>
+      </script>
+      <depends>
+         <module>cookie</module>
       </depends>
       <depends>
-        <module>portalControl</module>
+         <module>ecm-bootstrap</module>
       </depends>
-    </module>
-  </portlet>
-
-  <module>
-    <name>cookie</name>
-    <script>
-      <path>/javascript/exo/add-on/jquery.cookie.js</path>
-    </script>
-    <depends>
-      <module>jquery</module>
-      <as>gj</as>
-    </depends>
-  </module>
-  
-  <module>
-    <name>reminder</name>
-    <script>
-      <path>/javascript/exo/add-on/UIAddonsReminder.js</path>
-    </script>
-    <depends>
-      <module>cookie</module>
-    </depends>
-    <depends>
-      <module>ecm-bootstrap</module>
-    </depends>
-    <depends>
-      <module>jquery</module>
-      <as>gj</as>
-    </depends>
-    <depends>
-      <module>wcm-utils</module>
-    </depends>
-  </module>
-
-
-
+      <depends>
+         <module>jquery</module>
+         <as>gj</as>
+      </depends>
+      <depends>
+         <module>wcm-utils</module>
+      </depends>
+   </module>
 </gatein-resources>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
 
     Copyright (C) 2003-2013 eXo Platform SAS.
@@ -19,31 +19,27 @@
     02110-1301 USA, or see the FSF site: http://www.fsf.org.
 
 -->
-<portlet-app version="1.0" xmlns="http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd"
-           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-             xsi:schemaLocation="http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd">
-
-  <!-- AddOn Portlet -->
-  <portlet>
-    <description xml:lang="EN">Maintenance Warning Portlet</description>
-    <portlet-name>MaintenanceWarningPortlet</portlet-name>
-    <display-name xml:lang="EN">Maintenance Warning Portlet</display-name>
-    <portlet-class>org.exoplatform.webui.application.portlet.PortletApplicationController</portlet-class>    
-    <init-param>
-      <name>webui.configuration</name>
-      <value>/WEB-INF/conf/portlet/maintenance-warning-addon/configuration.xml</value>
-    </init-param>
-    <expiration-cache>0</expiration-cache>
-    <supports>
-      <mime-type>text/html</mime-type>
-    </supports>
-    <supported-locale>en</supported-locale>
-    <resource-bundle>locale.portlet.addon.AddOnReminderPortlet</resource-bundle>
-    <portlet-info>
-      <title>Maintenance Warning Portlet</title>
-      <short-title>Maintenance Warning Portlet</short-title>  
-      <keywords>maintenance-warning-addon-webapp</keywords>
-    </portlet-info>
-  </portlet>  
-
+<portlet-app xmlns="http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0" xsi:schemaLocation="http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd">
+   <!-- AddOn Portlet -->
+   <portlet>
+      <description xml:lang="EN">Maintenance Warning Portlet</description>
+      <portlet-name>MaintenanceWarningPortlet</portlet-name>
+      <display-name xml:lang="EN">Maintenance Warning Portlet</display-name>
+      <portlet-class>org.exoplatform.webui.application.portlet.PortletApplicationController</portlet-class>
+      <init-param>
+         <name>webui.configuration</name>
+         <value>/WEB-INF/conf/portlet/maintenance-warning-addon/configuration.xml</value>
+      </init-param>
+      <expiration-cache>0</expiration-cache>
+      <supports>
+         <mime-type>text/html</mime-type>
+      </supports>
+      <supported-locale>en</supported-locale>
+      <resource-bundle>locale.portlet.addon.AddOnReminderPortlet</resource-bundle>
+      <portlet-info>
+         <title>Maintenance Warning Portlet</title>
+         <short-title>Maintenance Warning Portlet</short-title>
+         <keywords>maintenance-warning-addon-webapp</keywords>
+      </portlet-info>
+   </portlet>
 </portlet-app>
