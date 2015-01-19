@@ -4,10 +4,13 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.security.RolesAllowed;
+import javax.jcr.RepositoryException;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -26,11 +29,15 @@ import org.exoplatform.calendar.service.EventQuery;
 import org.exoplatform.calendar.service.GroupCalendarData;
 import org.exoplatform.calendar.service.Reminder;
 import org.exoplatform.calendar.service.Utils;
+import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.container.PortalContainer;
+import org.exoplatform.services.jcr.RepositoryService;
+import org.exoplatform.services.jcr.core.ManageableRepository;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.rest.impl.RuntimeDelegateImpl;
 import org.exoplatform.services.rest.resource.ResourceContainer;
+import org.infinispan.commons.hash.Hash;
 import org.joda.time.DateTimeZone;
 
 @Path("/reminderservice")
@@ -40,8 +47,9 @@ public class ReminderRestService implements ResourceContainer {
 	//check after and before 1 hour
 	private static final int HOUR_BEFORE = 1;
 
-	static List<MessageReminder> listCommentMessagesResult;
-	static java.util.Calendar timeOld;
+	
+	static Map<String,List<MessageReminder>> mapReminderResult;
+	static Map<String, java.util.Calendar> mapReminderTime;
 	
 	  private static final CacheControl cacheControl;
 	  static {
@@ -53,11 +61,11 @@ public class ReminderRestService implements ResourceContainer {
 	
 
 	public ReminderRestService() {
-		listCommentMessagesResult = new ArrayList<ReminderRestService.MessageReminder>();
-		Calendar cal = new Calendar();	
-	    DateTimeZone timeZone = DateTimeZone.forID(cal.getTimeZone());
-	    timeOld = java.util.Calendar.getInstance(timeZone.toTimeZone());		
+		mapReminderResult = new HashMap<String, List<MessageReminder>>();
+		mapReminderTime = new HashMap<String, java.util.Calendar>();	
 	}
+	
+	
 	
 	
 	@GET
@@ -66,8 +74,8 @@ public class ReminderRestService implements ResourceContainer {
 	@RolesAllowed("users")
 	public Response callpopup(@Context SecurityContext sc, @Context UriInfo uriInfo) throws Exception {
 		
-		if (isRefreshResults(listCommentMessagesResult,timeOld)){
-		log.debug("REFRESH UPDATED------"+ ReminderRestService.class);
+		if (isRefreshResults(mapReminderResult,mapReminderTime, getNameTenant())){
+		log.debug("REFRESH UPDATED---"+ ReminderRestService.class+ " at "+getNameTenant());
 		
 		List<MessageReminder> listCommentMessages = new ArrayList<ReminderRestService.MessageReminder>();
 		String username = getUserId(sc, uriInfo);	
@@ -132,13 +140,13 @@ public class ReminderRestService implements ResourceContainer {
 	    	}
 	    	listCommentMessages.add(msgReminder);
 	    }
-	    listCommentMessagesResult = listCommentMessages;
+	    mapReminderResult.put(getNameTenant(), listCommentMessages);
 		}
 		else{
-			log.debug("NO UPDATED------"+ ReminderRestService.class);
+			log.debug("NO UPDATED---"+ ReminderRestService.class+ " at "+getNameTenant());
 		}
 	    
-		return Response.ok(listCommentMessagesResult , MediaType.APPLICATION_JSON).cacheControl(cacheControl).build();
+		return Response.ok(mapReminderResult.get(getNameTenant()), MediaType.APPLICATION_JSON).cacheControl(cacheControl).build();
 	}
 	
 	/**
@@ -249,12 +257,15 @@ public class ReminderRestService implements ResourceContainer {
 	  }
 	  
 			/**
-			 * Update new result
+			 * Update event list
+			 * each tenant name has a list events
+			 * TRUE if name tenant is first search, 
 			 * @param list
 			 * @param timeLastes
 			 * @return
+			 * @throws RepositoryException 
 			 */
-			public static boolean isRefreshResults(List<MessageReminder> list, java.util.Calendar timeLastest){
+			public static boolean isRefreshResults(Map<String,List<MessageReminder>> mapReminderResult, Map<String, java.util.Calendar> mapReminderTime, String nameTenant) throws RepositoryException{
 				// get current time base on timezone
 				Calendar cal = new Calendar();		
 			    DateTimeZone timeZone = DateTimeZone.forID(cal.getTimeZone());
@@ -262,20 +273,32 @@ public class ReminderRestService implements ResourceContainer {
 			    // Five Minutes delay, we substract 1000 miliseconds to sync with javascript
 			    long FiveMinutes = 5*60*1000 - 1000;
 			    
-				if (list.isEmpty()){
-					timeOld = timeCurrent;
-					return true;
-				}
-				else if (list.get(list.size()-1).getDescription() == null){
-					timeOld = timeCurrent;
-					return true;
-				}
-				else if(timeCurrent.getTimeInMillis() - timeLastest.getTimeInMillis() > FiveMinutes){
-					timeOld = timeCurrent;
-					return true;
-				}
-				return false;
+			    if (mapReminderResult.get(getNameTenant()) == null){
+			    	mapReminderTime.put(getNameTenant(), timeCurrent);
+			    	return true;
+			    }
+			    
+			    else if(mapReminderResult.get(getNameTenant()).isEmpty()){
+			    	mapReminderTime.put(getNameTenant(), timeCurrent);
+			    	return true;
+			    }
+			    else if((mapReminderResult.get(getNameTenant()).get(mapReminderResult.get(getNameTenant()).size()-1).getDescription() == null )){
+			    	mapReminderTime.put(getNameTenant(), timeCurrent);
+			    	return true;
+			    }
+			    else if (timeCurrent.getTimeInMillis() -  mapReminderTime.get(getNameTenant()).getTimeInMillis() > FiveMinutes){
+			    	mapReminderTime.put(getNameTenant(), timeCurrent);
+			    	return true;
+			    }
+			    return false;
+
 			}
+			
 		
+			static String getNameTenant() throws RepositoryException{
+				RepositoryService repositoryService = CommonsUtils.getService(RepositoryService.class);
+				ManageableRepository currentRepo = repositoryService.getCurrentRepository();
+				return currentRepo.getConfiguration().getName();				
+			}
 
 }

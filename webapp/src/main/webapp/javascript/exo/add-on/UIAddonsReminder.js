@@ -15,8 +15,9 @@ reminderObj.init = function(){
     portalName: portalENV.portalName
     }
 
-    // interval seconds 5 minutes
+    // interval seconds 15*4*5 seconds
     var INTERVAL_DISPLAY_POPUP = 15*4*5;
+
     var isPopUpActivate = true;
     var isDescriptionExist = false;
     //http://localhost:8080/rest/reminderservice/call
