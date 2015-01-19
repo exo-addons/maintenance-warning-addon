@@ -2,6 +2,8 @@
 (function(gj) {
 
 var reminderObj = {};
+var timerReminder;
+var func;
 
 reminderObj.init = function(){
     //default configuration values
@@ -13,16 +15,16 @@ reminderObj.init = function(){
     portalName: portalENV.portalName
     }
 
-    // interval seconds
+    // interval seconds 5 minutes
     var INTERVAL_DISPLAY_POPUP = 15*4*5;
     var isPopUpActivate = true;
     var isDescriptionExist = false;
     //http://localhost:8080/rest/reminderservice/call
     var callURL = "http://"+configuration.serverURL + configuration.spaceServicePath;
-    var timerReminder;
+
     var remainingMinutes; 
 
-    var func = function FetchData() 
+    func = function FetchData() 
       {
       if (isPopUpActivate)
         {
@@ -55,8 +57,6 @@ reminderObj.init = function(){
         }
       }
 
-
-
     timerReminder = setInterval(func, INTERVAL_DISPLAY_POPUP * 1000);
 
   //split data JSON, get only Description, add remaining time minute
@@ -78,10 +78,9 @@ reminderObj.init = function(){
         else{
 
                 if (gj.cookie("reminder--"+time) == 'true'){
-
                 if(remainingMinutes > 0 && isDescriptionExist )
                     {
-
+                     clearInterval(timerReminder);
                       var id = "reminderContent-"+time;
                       var text = ""+htmlForTextWithEmbeddedNewlines(reminderDescription,remainingMinutes) + inputHidden;
                       var strVar="";
@@ -116,6 +115,7 @@ reminderObj.init = function(){
                      gj("#block").append(strVar);
                      createScript(time, timerReminder, INTERVAL_DISPLAY_POPUP, func);
                      gj(idS).show();
+
                     }
                 }
                 else{
@@ -130,30 +130,30 @@ function createScript(time, timerReminder, INTERVAL_DISPLAY_POPUP, func){
     var idOK = "#reminderOK"+time;
     var idClose = "#reminderClose"+time;
     var idPopUp = "#reminderContent-"+time;
-    gj(idOK).click(function() {
-       
-       var valueInput= "#reminderDismiss"+time;  
-       var valueReminder= "reminder--"+time;  
-
-      if (gj(valueInput).is(':checked')) {
-        isPopUpActivate = true;
-        gj.cookie(valueReminder, false);
-        }
-        else{
-        isPopUpActivate = true;
-        }
-
-       gj(idPopUp).hide();
-       clearInterval(timerReminder);
-       timerReminder = setInterval(func, INTERVAL_DISPLAY_POPUP * 1000);
-    });
-
-    //close popup then repeat after timer interval 
-    gj(idClose).click(function() {
-    gj(idPopUp).hide();
     clearInterval(timerReminder);
-    timerReminder = setInterval(func, INTERVAL_DISPLAY_POPUP * 1000);
+    gj(idOK).click(function() {        
+ 
+        var valueInput= "#reminderDismiss"+time;  
+        var valueReminder= "reminder--"+time;  
+        if (gj(valueInput).is(':checked')) {
+          isPopUpActivate = true;
+          gj.cookie(valueReminder, false);
+          }
+          else{
+          isPopUpActivate = true;
+          }
+
+         gj(idPopUp).hide();
+         clearInterval(timerReminder);
+         timerReminder = setInterval(func, INTERVAL_DISPLAY_POPUP * 1000);
     });
+
+      //close popup then repeat after timer interval 
+      gj(idClose).click(function() {
+        gj(idPopUp).hide();
+        clearInterval(timerReminder);
+        timerReminder = setInterval(func, INTERVAL_DISPLAY_POPUP * 1000);
+      });
 }
 
 function htmlForTextWithEmbeddedNewlines(text, remainingMinutes) {

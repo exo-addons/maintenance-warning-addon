@@ -39,8 +39,9 @@ public class ReminderRestService implements ResourceContainer {
 	private static final Log log = ExoLogger.getLogger(ReminderRestService.class.getName());	
 	//check after and before 1 hour
 	private static final int HOUR_BEFORE = 1;
-	//default is 5 minutes
-//	private static long DEFAULT_REPEAT_INTERVAL_MINUTE = 5*60*1000;	
+
+	static List<MessageReminder> listCommentMessagesResult;
+	static java.util.Calendar timeOld;
 	
 	  private static final CacheControl cacheControl;
 	  static {
@@ -52,6 +53,10 @@ public class ReminderRestService implements ResourceContainer {
 	
 
 	public ReminderRestService() {
+		listCommentMessagesResult = new ArrayList<ReminderRestService.MessageReminder>();
+		Calendar cal = new Calendar();	
+	    DateTimeZone timeZone = DateTimeZone.forID(cal.getTimeZone());
+	    timeOld = java.util.Calendar.getInstance(timeZone.toTimeZone());		
 	}
 	
 	
@@ -60,6 +65,10 @@ public class ReminderRestService implements ResourceContainer {
 	@Produces("application/json")
 	@RolesAllowed("users")
 	public Response callpopup(@Context SecurityContext sc, @Context UriInfo uriInfo) throws Exception {
+		
+		if (isRefreshResults(listCommentMessagesResult,timeOld)){
+		log.debug("REFRESH UPDATED------"+ ReminderRestService.class);
+		
 		List<MessageReminder> listCommentMessages = new ArrayList<ReminderRestService.MessageReminder>();
 		String username = getUserId(sc, uriInfo);	
 
@@ -123,8 +132,13 @@ public class ReminderRestService implements ResourceContainer {
 	    	}
 	    	listCommentMessages.add(msgReminder);
 	    }
+	    listCommentMessagesResult = listCommentMessages;
+		}
+		else{
+			log.debug("NO UPDATED------"+ ReminderRestService.class);
+		}
 	    
-		return Response.ok(listCommentMessages , MediaType.APPLICATION_JSON).cacheControl(cacheControl).build();
+		return Response.ok(listCommentMessagesResult , MediaType.APPLICATION_JSON).cacheControl(cacheControl).build();
 	}
 	
 	/**
@@ -156,11 +170,7 @@ public class ReminderRestService implements ResourceContainer {
 				//if no reminder, we repeat algo after in REPEAT_INTERVAL_MINUTE
 			}
 		}
-		
 	}
-	
-	
-	
 	
 	  private static String getUserId(SecurityContext sc, UriInfo uriInfo) {
 
@@ -236,8 +246,36 @@ public class ReminderRestService implements ResourceContainer {
 		    public int compareTo(MessageReminder commentMessage) {
 		      return this.fromDate.compareTo(commentMessage.getFromDate());
 		    }
-		    
 	  }
-	
+	  
+			/**
+			 * Update new result
+			 * @param list
+			 * @param timeLastes
+			 * @return
+			 */
+			public static boolean isRefreshResults(List<MessageReminder> list, java.util.Calendar timeLastest){
+				// get current time base on timezone
+				Calendar cal = new Calendar();		
+			    DateTimeZone timeZone = DateTimeZone.forID(cal.getTimeZone());
+			    java.util.Calendar timeCurrent = java.util.Calendar.getInstance(timeZone.toTimeZone());
+			    // Five Minutes delay, we substract 1000 miliseconds to sync with javascript
+			    long FiveMinutes = 5*60*1000 - 1000;
+			    
+				if (list.isEmpty()){
+					timeOld = timeCurrent;
+					return true;
+				}
+				else if (list.get(list.size()-1).getDescription() == null){
+					timeOld = timeCurrent;
+					return true;
+				}
+				else if(timeCurrent.getTimeInMillis() - timeLastest.getTimeInMillis() > FiveMinutes){
+					timeOld = timeCurrent;
+					return true;
+				}
+				return false;
+			}
+		
 
 }
