@@ -37,7 +37,6 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.rest.impl.RuntimeDelegateImpl;
 import org.exoplatform.services.rest.resource.ResourceContainer;
-import org.infinispan.commons.hash.Hash;
 import org.joda.time.DateTimeZone;
 
 @Path("/reminderservice")
@@ -46,7 +45,6 @@ public class ReminderRestService implements ResourceContainer {
 	private static final Log log = ExoLogger.getLogger(ReminderRestService.class.getName());	
 	//check after and before 1 hour
 	private static final int HOUR_BEFORE = 1;
-
 	
 	static Map<String,List<MessageReminder>> mapReminderResult;
 	static Map<String, java.util.Calendar> mapReminderTime;
@@ -58,15 +56,11 @@ public class ReminderRestService implements ResourceContainer {
 	    cacheControl.setNoCache(true);
 	    cacheControl.setNoStore(true);
 	  }
-	
 
 	public ReminderRestService() {
 		mapReminderResult = new HashMap<String, List<MessageReminder>>();
 		mapReminderTime = new HashMap<String, java.util.Calendar>();	
 	}
-	
-	
-	
 	
 	@GET
 	@Path("call")
@@ -75,7 +69,7 @@ public class ReminderRestService implements ResourceContainer {
 	public Response callpopup(@Context SecurityContext sc, @Context UriInfo uriInfo) throws Exception {
 		
 		if (isRefreshResults(mapReminderResult,mapReminderTime, getNameTenant())){
-		log.debug("REFRESH UPDATED---"+ ReminderRestService.class+ " at "+getNameTenant());
+		log.debug("REFRESH UPDATED--- at "+getNameTenant());
 		
 		List<MessageReminder> listCommentMessages = new ArrayList<ReminderRestService.MessageReminder>();
 		String username = getUserId(sc, uriInfo);	
@@ -140,10 +134,12 @@ public class ReminderRestService implements ResourceContainer {
 	    	}
 	    	listCommentMessages.add(msgReminder);
 	    }
+	    //update hashmap 
 	    mapReminderResult.put(getNameTenant(), listCommentMessages);
+	    mapReminderTime.put(getNameTenant(), timeCurrent);
 		}
 		else{
-			log.debug("NO UPDATED---"+ ReminderRestService.class+ " at "+getNameTenant());
+			log.debug("NO UPDATED--- at "+getNameTenant());
 		}
 	    
 		return Response.ok(mapReminderResult.get(getNameTenant()), MediaType.APPLICATION_JSON).cacheControl(cacheControl).build();
@@ -259,7 +255,7 @@ public class ReminderRestService implements ResourceContainer {
 			/**
 			 * Update event list
 			 * each tenant name has a list events
-			 * TRUE if name tenant is first search, 
+			 * TRUE if name tenant is first search
 			 * @param list
 			 * @param timeLastes
 			 * @return
@@ -270,24 +266,20 @@ public class ReminderRestService implements ResourceContainer {
 				Calendar cal = new Calendar();		
 			    DateTimeZone timeZone = DateTimeZone.forID(cal.getTimeZone());
 			    java.util.Calendar timeCurrent = java.util.Calendar.getInstance(timeZone.toTimeZone());
+			    
 			    // Five Minutes delay, we substract 1000 miliseconds to sync with javascript
 			    long FiveMinutes = 5*60*1000 - 1000;
 			    
 			    if (mapReminderResult.get(getNameTenant()) == null){
-			    	mapReminderTime.put(getNameTenant(), timeCurrent);
 			    	return true;
-			    }
-			    
+			    }			    
 			    else if(mapReminderResult.get(getNameTenant()).isEmpty()){
-			    	mapReminderTime.put(getNameTenant(), timeCurrent);
 			    	return true;
 			    }
 			    else if((mapReminderResult.get(getNameTenant()).get(mapReminderResult.get(getNameTenant()).size()-1).getDescription() == null )){
-			    	mapReminderTime.put(getNameTenant(), timeCurrent);
 			    	return true;
 			    }
 			    else if (timeCurrent.getTimeInMillis() -  mapReminderTime.get(getNameTenant()).getTimeInMillis() > FiveMinutes){
-			    	mapReminderTime.put(getNameTenant(), timeCurrent);
 			    	return true;
 			    }
 			    return false;
