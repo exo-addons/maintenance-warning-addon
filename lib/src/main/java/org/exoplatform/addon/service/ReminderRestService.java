@@ -163,7 +163,7 @@ public class ReminderRestService implements ResourceContainer {
 			}
 			// update hashmap
 			mapReminderResult.put(getNameTenant(), listCommentMessages);
-			mapReminderTime.put(getNameTenant(), timeCurrent);
+			mapReminderTime.put(getNameTenant(), java.util.Calendar.getInstance());
 		} else {
 			log.debug("NO UPDATED--- at " + getNameTenant());
 		}
@@ -308,14 +308,12 @@ public class ReminderRestService implements ResourceContainer {
 			Map<String, java.util.Calendar> mapReminderTime, String nameTenant)
 			throws RepositoryException {
 		// get current time base on timezone
-		Calendar cal = new Calendar();
-		DateTimeZone timeZone = DateTimeZone.forID(cal.getTimeZone());
 		java.util.Calendar timeCurrent = java.util.Calendar
-				.getInstance(timeZone.toTimeZone());
+				.getInstance();
 
 		// Five Minutes delay, we substract 1000 miliseconds to sync with
 		// javascript
-		long FiveMinutes = 5 * 60 * 1000 - 1000;
+		long FiveMinutes = 3 * 60 * 1000 - 1000;
 
 		if (mapReminderResult.get(getNameTenant()) == null) {
 			return true;
