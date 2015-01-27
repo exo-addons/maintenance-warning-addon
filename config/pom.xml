@@ -4,7 +4,7 @@
    <parent>
       <artifactId>maintenance-warning-addon</artifactId>
       <groupId>org.exoplatform.addons.maintenancewarning</groupId>
-      <version>1.0.x-SNAPSHOT</version>
+      <version>1.0.0</version>
    </parent>
    <artifactId>maintenance-warning-addon-config</artifactId>
    <packaging>jar</packaging>
