@@ -11,12 +11,21 @@ Simply build it with :
 
 Deploy to eXo
 ---------------
-After build with this add-on:
-* Copy file maintenance-warning-addon/webapp/target/maintenance-warning-addon-webapp.war into Platform-Tomcat/webapps
-* Copy file maintenance-warning-addon/lib/target/maintenance-warning-addon-lib-1.0.x-SNAPSHOT.jar and maintenance-warning-addon/config/target/maintenance-warning-addon-config-1.0.x-SNAPSHOT.jar into Platform-Tomcat/lib
-* Start tomcat.
-* Note: three files above are also available in maintenance-warning-addon/bundle/target/maintenance-warning-addon-bundle-1.0.x-SNAPSHOT.zip
+By Add-on Manager:
+$ ./addon install exo-maintenance-warning:1.0.0
 
-Configuration
+Prerequisites for Installing Maintenance Warning Addon
 ---------------
+1) Configure your local Time Zone correctly with Tomcat server
+
+![check TimeZone](resource/ScreenShots/1_TimeZone.png)
+
+
+2) A calendar group "Maintenance" is already installed you should add your event detail in this group. View only for all Platform users, modify for administrators.
+
+![select Maintenance calendar](resource/ScreenShots/2_MaintenanceCalendar.png)
+
+3) As an adminstrator, choose More Details then check "Display a notification pop-up" and "Repeat", then choose your preferences time. 
+
+![check display Popup](resource/ScreenShots/3_DisplayPopup.png)
 
