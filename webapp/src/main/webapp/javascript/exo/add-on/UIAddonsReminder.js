@@ -21,7 +21,7 @@
         var isPopUpActivate = true;
         var isDescriptionExist = false;
         //http://localhost:8080/rest/reminderservice/call
-        var callURL = "http://" + configuration.serverURL + configuration.spaceServicePath;
+        var callURL = window.location.protocol + "//" + configuration.serverURL + configuration.spaceServicePath;
 
         var remainingMinutes;
 
