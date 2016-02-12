@@ -27,9 +27,9 @@
     <url>https://github.com/exo-addons/maintenance-warning-addon.git</url>
   </scm>
   <properties>
-    <exoplatform.version>4.1.0</exoplatform.version>
-    <org.exoplatform.core.version>2.5.11-GA</org.exoplatform.core.version>
-    <org.exoplatform.calendar.version>4.1.0</org.exoplatform.calendar.version>
+    <exoplatform.version>4.3.0</exoplatform.version>
+    <org.exoplatform.core.version>2.6.4-GA</org.exoplatform.core.version>
+    <org.exoplatform.calendar.version>4.3.0</org.exoplatform.calendar.version>
   </properties>
   <dependencyManagement>
     <dependencies>

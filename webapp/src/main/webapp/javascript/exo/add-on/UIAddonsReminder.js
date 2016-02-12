@@ -44,7 +44,8 @@
                                 var currentTime = d.getTime();
                                 var inputHidden = "<input type='hidden' value=" + element.fromDate.time + " id=" + element.fromDate.time + " />";
                                 remainingMinutes = Math.round((element.fromDate.time - currentTime) / (60 * 1000));
-                                var reminderDescription = splitData(element.description);
+                                //var reminderDescription = splitData(element.description);
+                                var reminderDescription = element.description;
                                 isDescriptionExist = true;
                                 storeCookies(reminderDescription, element.fromDate.time, remainingMinutes, isDescriptionExist, inputHidden, timerReminder, INTERVAL_DISPLAY_POPUP, func);
                             }
