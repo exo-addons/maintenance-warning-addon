@@ -22,6 +22,7 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.RuntimeDelegate;
 
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTimeZone;
 
 import org.exoplatform.calendar.service.Calendar;
@@ -82,7 +83,10 @@ public class ReminderRestService implements ResourceContainer {
                                                                          .getComponentInstance(CalendarService.class);
 
       // get current time base on timezone
-      DateTimeZone timeZone = DateTimeZone.forID(cal.getTimeZone());
+      String timeZoneString = cal.getTimeZone();
+      timeZoneString = timeZoneString.contains("+") ? timeZoneString.substring(timeZoneString.indexOf('+')) : timeZoneString;
+      timeZoneString = timeZoneString.contains("-") ? timeZoneString.substring(timeZoneString.indexOf('-')) : timeZoneString;
+      DateTimeZone timeZone = DateTimeZone.forID(timeZoneString);
       java.util.Calendar timeCurrent = java.util.Calendar.getInstance(timeZone.toTimeZone());
 
       // set time after and before 1 hours
@@ -129,6 +133,9 @@ public class ReminderRestService implements ResourceContainer {
             List<Reminder> listReminder = calendarRepeat.getReminders();
             for (Reminder reminderItem : listReminder) {
               reminderItem.setFromDateTime(baseResultEvent.getFromDateTime());
+              if (StringUtils.isEmpty(reminderItem.getDescription())) {
+                reminderItem.setDescription(calendarRepeat.getDescription());
+              }
               displayWarningReminderPopup(reminderItem, timeCurrent, msgReminder);
             }
           }
@@ -139,6 +146,9 @@ public class ReminderRestService implements ResourceContainer {
           List<Reminder> listReminder = baseResultEvent.getReminders();
           for (Reminder reminderItem : listReminder) {
             reminderItem.setFromDateTime(baseResultEvent.getFromDateTime());
+            if (StringUtils.isEmpty(reminderItem.getDescription())) {
+              reminderItem.setDescription(baseResultEvent.getDescription());
+            }
             displayWarningReminderPopup(reminderItem, timeCurrent, msgReminder);
           }
         }
@@ -166,17 +176,22 @@ public class ReminderRestService implements ResourceContainer {
                                                   MessageReminder msgReminder) {
     if (reminderItem.getReminderType().equals(Reminder.TYPE_POPUP)) {
       long minuteBeforeEventStarts = reminderItem.getAlarmBefore() * 60 * 1000;
-      Date timeBeforeEventStarts = new Date(reminderItem.getFromDateTime().getTime() - minuteBeforeEventStarts);
+      Date fromDateTime = reminderItem.getFromDateTime();
+
+      Date timeBeforeEventStarts = new Date(fromDateTime.getTime() - minuteBeforeEventStarts);
+
+      // Fixme the timezone is not good with the time used
+      fromDateTime = fixTimeZone(fromDateTime);
 
       Boolean before = timeCurrent.getTime().after(timeBeforeEventStarts);
-      Boolean after = timeCurrent.getTime().before(reminderItem.getFromDateTime());
+      Boolean after = timeCurrent.getTime().before(fromDateTime);
       // if time alarm before < current time < time reminder, we display
       // popup
       if (before && after) {
         log.debug("======= DISPLAY REMINDER POPUP=======");
         log.debug(reminderItem.getDescription());
-        if (reminderItem.getFromDateTime() != null) {
-          msgReminder.setFromDate(reminderItem.getFromDateTime());
+        if (fromDateTime != null) {
+          msgReminder.setFromDate(fromDateTime);
           msgReminder.setToDate(new Date());
           msgReminder.setDescription(reminderItem.getDescription());
           msgReminder.setSummary(reminderItem.getSummary());
@@ -187,6 +202,13 @@ public class ReminderRestService implements ResourceContainer {
         // REPEAT_INTERVAL_MINUTE
       }
     }
+  }
+
+  private static Date fixTimeZone(Date fromDateTime) {
+    java.util.Calendar calendar = java.util.Calendar.getInstance();
+    calendar.setTimeInMillis(fromDateTime.getTime() - fromDateTime.getTimezoneOffset() * 60 * 1000);
+    fromDateTime = calendar.getTime();
+    return fromDateTime;
   }
 
   private static String getUserId(SecurityContext sc, UriInfo uriInfo) {

@@ -16,7 +16,7 @@
         }
 
         // interval seconds 15*4*5 seconds
-        var INTERVAL_DISPLAY_POPUP = 15 * 4 * 5;
+        var INTERVAL_DISPLAY_POPUP = 300;
 
         var isPopUpActivate = true;
         var isDescriptionExist = false;
@@ -54,13 +54,17 @@
             }
         }
 
+        // This is used to make the first call on page display
+        func();
+        
         timerReminder = setInterval(func, INTERVAL_DISPLAY_POPUP * 1000);
 
         //split data JSON, get only Description, add remaining time minute
         function splitData(data) {
-            var res1 = data.split("Description:");
-            var res = res1[1].split("<br>")[0];
-            return res;
+          if(data.indexOf("Description:") >= 0) {
+            data = data.split("Description:")[1];
+          }
+          return data;
         }
     }
 

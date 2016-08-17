@@ -21,7 +21,9 @@ Prerequisites for Installing Maintenance Warning Addon
 ![check TimeZone](resource/ScreenShots/1_TimeZone.png)
 
 
-2) A calendar group "Maintenance" is already installed you should add your event detail in this group. View only for all Platform users, modify for administrators.
+2) A calendar group "Maintenance" is already installed you should add your event detail in this group. The default permissions set are "ReadOnly" for all platform users, and "ReadWrite" for administrators.
+The description of the event will be used as text message in the maintenance popup that will be displayed to end users.
+The remaining time until the event can be set dynamically in the popup message by using *%remainig_time%* keyword in the description of the event.
 
 ![select Maintenance calendar](resource/ScreenShots/2_MaintenanceCalendar.png)
 
