@@ -168,8 +168,9 @@ public class ReminderRestService implements ResourceContainer {
    * display warning reminder popup if time alarm before < current time < time
    * reminder then repeat after intervall minute
    * 
-   * @param reminderItem
-   * @param timeCurrent
+   * @param reminderItem reminder item of calendar event
+   * @param timeCurrent current time in server
+   * @param msgReminder reminder message that will be computed from two first parameters
    */
   private static void displayWarningReminderPopup(Reminder reminderItem,
                                                   java.util.Calendar timeCurrent,
@@ -301,10 +302,11 @@ public class ReminderRestService implements ResourceContainer {
    * Update event list each tenant name has a list events TRUE if name tenant is
    * first search
    * 
-   * @param list
-   * @param timeLastes
-   * @return
-   * @throws RepositoryException
+   * @param mapReminderResult : cached reminders
+   * @param mapReminderTime : cached reminders time
+   * @param nameTenant : container tenant name
+   * @return true if refresh is needed
+   * @throws RepositoryException if a JCR operation fails
    */
   public static boolean isRefreshResults(Map<String, List<MessageReminder>> mapReminderResult,
                                          Map<String, java.util.Calendar> mapReminderTime,
