@@ -28,6 +28,7 @@ import org.joda.time.DateTimeZone;
 import org.exoplatform.calendar.service.Calendar;
 import org.exoplatform.calendar.service.CalendarEvent;
 import org.exoplatform.calendar.service.CalendarService;
+import org.exoplatform.calendar.service.CalendarSetting;
 import org.exoplatform.calendar.service.EventQuery;
 import org.exoplatform.calendar.service.GroupCalendarData;
 import org.exoplatform.calendar.service.Reminder;
@@ -78,39 +79,46 @@ public class ReminderRestService implements ResourceContainer {
       List<MessageReminder> listCommentMessages = new ArrayList<ReminderRestService.MessageReminder>();
       String username = getUserId(sc, uriInfo);
 
-      Calendar cal = new Calendar();
       CalendarService calendarService = (CalendarService) PortalContainer.getInstance()
                                                                          .getComponentInstance(CalendarService.class);
-
-      // get current time base on timezone
-      String timeZoneString = cal.getTimeZone();
-      timeZoneString = timeZoneString.contains("+") ? timeZoneString.substring(timeZoneString.indexOf('+')) : timeZoneString;
-      timeZoneString = timeZoneString.contains("-") ? timeZoneString.substring(timeZoneString.indexOf('-')) : timeZoneString;
-      DateTimeZone timeZone = DateTimeZone.forID(timeZoneString);
-      java.util.Calendar timeCurrent = java.util.Calendar.getInstance(timeZone.toTimeZone());
-
-      // set time after and before 1 hours
-      timeCurrent.set(java.util.Calendar.HOUR_OF_DAY, timeCurrent.get(java.util.Calendar.HOUR_OF_DAY) - HOUR_BEFORE);
-      Date timeCurrentBefore1Hour = timeCurrent.getTime();
-      timeCurrent.set(java.util.Calendar.HOUR_OF_DAY, timeCurrent.get(java.util.Calendar.HOUR_OF_DAY) + 2 * HOUR_BEFORE);
-      Date timeCurrentAfter1Hour = timeCurrent.getTime();
-      // set current time to normal
-      timeCurrent.set(java.util.Calendar.HOUR_OF_DAY, timeCurrent.get(java.util.Calendar.HOUR_OF_DAY) - HOUR_BEFORE);
-
-      EventQuery eventQuery = new EventQuery();
       String idCalendarAdmin[] = new String[] { "" };
       List<GroupCalendarData> groupCalendarAdminList = calendarService.getGroupCalendars(new String[] { "/platform/users" },
                                                                                          true,
                                                                                          username);
+      Calendar maintenanceCalendar = null;
       for (GroupCalendarData group : groupCalendarAdminList) {
         for (Calendar itemCalendar : group.getCalendars()) {
           // if calendar name Maintenance
           if (itemCalendar.getName().equals(ReminderServiceImpl.nameCalendarMaintenance)) {
+            maintenanceCalendar = itemCalendar;
             idCalendarAdmin[idCalendarAdmin.length - 1] = itemCalendar.getId();
           }
         }
       }
+      if (maintenanceCalendar == null) {
+        log.warn("Maintenance calendar not found");
+        return Response.ok().build();
+      }
 
+      CalendarSetting setting = calendarService.getCalendarSetting(username);
+
+      // get current time base on timezone
+      String timeZoneString = setting.getTimeZone();
+
+      timeZoneString = timeZoneString.contains("+") ? timeZoneString.substring(timeZoneString.indexOf('+')) : timeZoneString;
+      timeZoneString = timeZoneString.contains("-") ? timeZoneString.substring(timeZoneString.indexOf('-')) : timeZoneString;
+      DateTimeZone timeZone = DateTimeZone.forID(timeZoneString);
+      java.util.Calendar currentTimeCalendar = java.util.Calendar.getInstance(timeZone.toTimeZone());
+
+      Date currentTime = currentTimeCalendar.getTime();
+
+      // set time after and before 1 hours
+      currentTimeCalendar.set(java.util.Calendar.HOUR_OF_DAY, currentTimeCalendar.get(java.util.Calendar.HOUR_OF_DAY) - HOUR_BEFORE);
+      Date timeCurrentBefore1Hour = currentTimeCalendar.getTime();
+      currentTimeCalendar.set(java.util.Calendar.HOUR_OF_DAY, currentTimeCalendar.get(java.util.Calendar.HOUR_OF_DAY) + 2 * HOUR_BEFORE);
+      Date timeCurrentAfter1Hour = currentTimeCalendar.getTime();
+
+      EventQuery eventQuery = new EventQuery();
       eventQuery.setCalendarId(idCalendarAdmin);
 
       List<CalendarEvent> events = calendarService.getPublicEvents(eventQuery);
@@ -136,7 +144,7 @@ public class ReminderRestService implements ResourceContainer {
               if (StringUtils.isEmpty(reminderItem.getDescription())) {
                 reminderItem.setDescription(calendarRepeat.getDescription());
               }
-              displayWarningReminderPopup(reminderItem, timeCurrent, msgReminder);
+              displayWarningReminderPopup(reminderItem, currentTime, msgReminder);
             }
           }
         }
@@ -149,7 +157,7 @@ public class ReminderRestService implements ResourceContainer {
             if (StringUtils.isEmpty(reminderItem.getDescription())) {
               reminderItem.setDescription(baseResultEvent.getDescription());
             }
-            displayWarningReminderPopup(reminderItem, timeCurrent, msgReminder);
+            displayWarningReminderPopup(reminderItem, currentTime, msgReminder);
           }
         }
         listCommentMessages.add(msgReminder);
@@ -169,47 +177,35 @@ public class ReminderRestService implements ResourceContainer {
    * reminder then repeat after intervall minute
    * 
    * @param reminderItem reminder item of calendar event
-   * @param timeCurrent current time in server
+   * @param currentTime current time in server
    * @param msgReminder reminder message that will be computed from two first parameters
    */
   private static void displayWarningReminderPopup(Reminder reminderItem,
-                                                  java.util.Calendar timeCurrent,
+                                                  Date currentTime,
                                                   MessageReminder msgReminder) {
     if (reminderItem.getReminderType().equals(Reminder.TYPE_POPUP)) {
-      long minuteBeforeEventStarts = reminderItem.getAlarmBefore() * 60 * 1000;
+      long minuteBeforeEventStarts = reminderItem.getAlarmBefore() * 60000;
       Date fromDateTime = reminderItem.getFromDateTime();
 
       Date timeBeforeEventStarts = new Date(fromDateTime.getTime() - minuteBeforeEventStarts);
 
-      // Fixme the timezone is not good with the time used
-      fromDateTime = fixTimeZone(fromDateTime);
-
-      Boolean before = timeCurrent.getTime().after(timeBeforeEventStarts);
-      Boolean after = timeCurrent.getTime().before(fromDateTime);
+      Boolean before = currentTime.after(timeBeforeEventStarts);
+      Boolean after = currentTime.before(fromDateTime);
       // if time alarm before < current time < time reminder, we display
       // popup
       if (before && after) {
         log.debug("======= DISPLAY REMINDER POPUP=======");
         log.debug(reminderItem.getDescription());
-        if (fromDateTime != null) {
-          msgReminder.setFromDate(fromDateTime);
-          msgReminder.setToDate(new Date());
-          msgReminder.setDescription(reminderItem.getDescription());
-          msgReminder.setSummary(reminderItem.getSummary());
-          msgReminder.setRepeatIntervalMinute(reminderItem.getRepeatInterval());
-        }
+        msgReminder.setFromDate(fromDateTime);
+        msgReminder.setToDate(new Date());
+        msgReminder.setDescription(reminderItem.getDescription());
+        msgReminder.setSummary(reminderItem.getSummary());
+        msgReminder.setRepeatIntervalMinute(reminderItem.getRepeatInterval());
       } else {
         // if no reminder, we repeat algo after in
         // REPEAT_INTERVAL_MINUTE
       }
     }
-  }
-
-  private static Date fixTimeZone(Date fromDateTime) {
-    java.util.Calendar calendar = java.util.Calendar.getInstance();
-    calendar.setTimeInMillis(fromDateTime.getTime() - fromDateTime.getTimezoneOffset() * 60 * 1000);
-    fromDateTime = calendar.getTime();
-    return fromDateTime;
   }
 
   private static String getUserId(SecurityContext sc, UriInfo uriInfo) {
