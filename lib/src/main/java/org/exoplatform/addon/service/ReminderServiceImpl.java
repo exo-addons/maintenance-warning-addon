@@ -16,9 +16,6 @@ public class ReminderServiceImpl implements Startable {
 	private Boolean isExistGroupMaintenance = false;
 	public static String nameCalendarMaintenance = "Maintenance";
 
-	/**
-	 * @param repositoryService
-	 */
 	public ReminderServiceImpl() {
 	}
 

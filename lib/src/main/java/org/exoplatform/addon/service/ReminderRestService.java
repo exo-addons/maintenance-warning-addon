@@ -22,9 +22,13 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.RuntimeDelegate;
 
+import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTimeZone;
+
 import org.exoplatform.calendar.service.Calendar;
 import org.exoplatform.calendar.service.CalendarEvent;
 import org.exoplatform.calendar.service.CalendarService;
+import org.exoplatform.calendar.service.CalendarSetting;
 import org.exoplatform.calendar.service.EventQuery;
 import org.exoplatform.calendar.service.GroupCalendarData;
 import org.exoplatform.calendar.service.Reminder;
@@ -37,306 +41,296 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.rest.impl.RuntimeDelegateImpl;
 import org.exoplatform.services.rest.resource.ResourceContainer;
-import org.joda.time.DateTimeZone;
 
 @Path("/reminderservice")
 @RolesAllowed("users")
 public class ReminderRestService implements ResourceContainer {
-	private static final Log log = ExoLogger
-			.getLogger(ReminderRestService.class.getName());
-	// check after and before 1 hour
-	private static final int HOUR_BEFORE = 1;
+  private static final Log                  log         = ExoLogger.getLogger(ReminderRestService.class.getName());
 
-	static Map<String, List<MessageReminder>> mapReminderResult;
-	static Map<String, java.util.Calendar> mapReminderTime;
+  // check after and before 1 hour
+  private static final int                  HOUR_BEFORE = 1;
 
-	private static final CacheControl cacheControl;
-	static {
-		RuntimeDelegate.setInstance(new RuntimeDelegateImpl());
-		cacheControl = new CacheControl();
-		cacheControl.setNoCache(true);
-		cacheControl.setNoStore(true);
-	}
+  static Map<String, List<MessageReminder>> mapReminderResult;
 
-	public ReminderRestService() {
-		mapReminderResult = new HashMap<String, List<MessageReminder>>();
-		mapReminderTime = new HashMap<String, java.util.Calendar>();
-	}
+  static Map<String, java.util.Calendar>    mapReminderTime;
 
-	@GET
-	@Path("call")
-	@Produces("application/json")
-	@RolesAllowed("users")
-	public Response callpopup(@Context SecurityContext sc,
-			@Context UriInfo uriInfo) throws Exception {
+  private static final CacheControl         cacheControl;
+  static {
+    RuntimeDelegate.setInstance(new RuntimeDelegateImpl());
+    cacheControl = new CacheControl();
+    cacheControl.setNoCache(true);
+    cacheControl.setNoStore(true);
+  }
 
-		if (isRefreshResults(mapReminderResult, mapReminderTime,
-				getNameTenant())) {
-			log.debug("REFRESH UPDATED--- at " + getNameTenant());
+  public ReminderRestService() {
+    mapReminderResult = new HashMap<String, List<MessageReminder>>();
+    mapReminderTime = new HashMap<String, java.util.Calendar>();
+  }
 
-			List<MessageReminder> listCommentMessages = new ArrayList<ReminderRestService.MessageReminder>();
-			String username = getUserId(sc, uriInfo);
+  @GET
+  @Path("call")
+  @Produces("application/json")
+  @RolesAllowed("users")
+  public Response callpopup(@Context SecurityContext sc, @Context UriInfo uriInfo) throws Exception {
 
-			Calendar cal = new Calendar();
-			CalendarService calendarService = (CalendarService) PortalContainer
-					.getInstance().getComponentInstance(CalendarService.class);
+    if (isRefreshResults(mapReminderResult, mapReminderTime, getNameTenant())) {
+      log.debug("REFRESH UPDATED--- at " + getNameTenant());
 
-			// get current time base on timezone
-			DateTimeZone timeZone = DateTimeZone.forID(cal.getTimeZone());
-			java.util.Calendar timeCurrent = java.util.Calendar
-					.getInstance(timeZone.toTimeZone());
+      List<MessageReminder> listCommentMessages = new ArrayList<ReminderRestService.MessageReminder>();
+      String username = getUserId(sc, uriInfo);
 
-			// set time after and before 1 hours
-			timeCurrent.set(java.util.Calendar.HOUR_OF_DAY,
-					timeCurrent.get(java.util.Calendar.HOUR_OF_DAY)
-							- HOUR_BEFORE);
-			Date timeCurrentBefore1Hour = timeCurrent.getTime();
-			timeCurrent.set(java.util.Calendar.HOUR_OF_DAY,
-					timeCurrent.get(java.util.Calendar.HOUR_OF_DAY) + 2
-							* HOUR_BEFORE);
-			Date timeCurrentAfter1Hour = timeCurrent.getTime();
-			// set current time to normal
-			timeCurrent.set(java.util.Calendar.HOUR_OF_DAY,
-					timeCurrent.get(java.util.Calendar.HOUR_OF_DAY)
-							- HOUR_BEFORE);
+      CalendarService calendarService = (CalendarService) PortalContainer.getInstance()
+                                                                         .getComponentInstance(CalendarService.class);
+      String idCalendarAdmin[] = new String[] { "" };
+      List<GroupCalendarData> groupCalendarAdminList = calendarService.getGroupCalendars(new String[] { "/platform/users" },
+                                                                                         true,
+                                                                                         username);
+      Calendar maintenanceCalendar = null;
+      for (GroupCalendarData group : groupCalendarAdminList) {
+        for (Calendar itemCalendar : group.getCalendars()) {
+          // if calendar name Maintenance
+          if (itemCalendar.getName().equals(ReminderServiceImpl.nameCalendarMaintenance)) {
+            maintenanceCalendar = itemCalendar;
+            idCalendarAdmin[idCalendarAdmin.length - 1] = itemCalendar.getId();
+          }
+        }
+      }
+      if (maintenanceCalendar == null) {
+        log.warn("Maintenance calendar not found");
+        return Response.ok().build();
+      }
 
-			EventQuery eventQuery = new EventQuery();
-			String idCalendarAdmin[] = new String[] { "" };
-			List<GroupCalendarData> groupCalendarAdminList = calendarService
-					.getGroupCalendars(new String[] { "/platform/users" },
-							true, username);
-			for (GroupCalendarData group : groupCalendarAdminList) {
-				for (Calendar itemCalendar : group.getCalendars()) {
-					// if calendar name Maintenance
-					if (itemCalendar.getName().equals(
-							ReminderServiceImpl.nameCalendarMaintenance)) {
-						idCalendarAdmin[idCalendarAdmin.length - 1] = itemCalendar
-								.getId();
-					}
-				}
-			}
+      CalendarSetting setting = calendarService.getCalendarSetting(username);
 
-			eventQuery.setCalendarId(idCalendarAdmin);
+      // get current time base on timezone
+      String timeZoneString = setting.getTimeZone();
 
-			List<CalendarEvent> events = calendarService
-					.getPublicEvents(eventQuery);
-			for (CalendarEvent baseResultEvent : events) {
-				MessageReminder msgReminder = new MessageReminder();
+      timeZoneString = timeZoneString.contains("+") ? timeZoneString.substring(timeZoneString.indexOf('+')) : timeZoneString;
+      timeZoneString = timeZoneString.contains("-") ? timeZoneString.substring(timeZoneString.indexOf('-')) : timeZoneString;
+      DateTimeZone timeZone = DateTimeZone.forID(timeZoneString);
+      java.util.Calendar currentTimeCalendar = java.util.Calendar.getInstance(timeZone.toTimeZone());
 
-				// if calendar event repeat, build a series of calendar linked
-				// to the first calendar, then check if current calendar (+-1h)
-				// have Maintenance event
-				if (Utils.isRepeatEvent(baseResultEvent)) {
-					Collection<CalendarEvent> calendarCollection = calendarService
-							.buildSeries(baseResultEvent,
-									timeCurrentBefore1Hour,
-									timeCurrentAfter1Hour, username);
-					Iterator<CalendarEvent> iteratorCalendar = calendarCollection
-							.iterator();
+      Date currentTime = currentTimeCalendar.getTime();
 
-					log.debug("=======REPEAT EVENT=======");
-					while (iteratorCalendar.hasNext()) {
-						CalendarEvent calendarRepeat = iteratorCalendar.next();
-						List<Reminder> listReminder = calendarRepeat
-								.getReminders();
-						for (Reminder reminderItem : listReminder) {
-							reminderItem.setFromDateTime(baseResultEvent
-									.getFromDateTime());
-							displayWarningReminderPopup(reminderItem,
-									timeCurrent, msgReminder);
-						}
-					}
-				}
-				/* if not repeat, check only event +-1h */
-				else {
-					log.debug("=======NOT REPEAT EVENT=======");
-					List<Reminder> listReminder = baseResultEvent
-							.getReminders();
-					for (Reminder reminderItem : listReminder) {
-						reminderItem.setFromDateTime(baseResultEvent
-								.getFromDateTime());
-						displayWarningReminderPopup(reminderItem, timeCurrent,
-								msgReminder);
-					}
-				}
-				listCommentMessages.add(msgReminder);
-			}
-			// update hashmap
-			mapReminderResult.put(getNameTenant(), listCommentMessages);
-			mapReminderTime.put(getNameTenant(), java.util.Calendar.getInstance());
-		} else {
-			log.debug("NO UPDATED--- at " + getNameTenant());
-		}
+      // set time after and before 1 hours
+      currentTimeCalendar.set(java.util.Calendar.HOUR_OF_DAY, currentTimeCalendar.get(java.util.Calendar.HOUR_OF_DAY) - HOUR_BEFORE);
+      Date timeCurrentBefore1Hour = currentTimeCalendar.getTime();
+      currentTimeCalendar.set(java.util.Calendar.HOUR_OF_DAY, currentTimeCalendar.get(java.util.Calendar.HOUR_OF_DAY) + 2 * HOUR_BEFORE);
+      Date timeCurrentAfter1Hour = currentTimeCalendar.getTime();
 
-		return Response
-				.ok(mapReminderResult.get(getNameTenant()),
-						MediaType.APPLICATION_JSON).cacheControl(cacheControl)
-				.build();
-	}
+      EventQuery eventQuery = new EventQuery();
+      eventQuery.setCalendarId(idCalendarAdmin);
 
-	/**
-	 * display warning reminder popup if time alarm before < current time < time
-	 * reminder then repeat after intervall minute
-	 * 
-	 * @param reminderItem
-	 * @param timeCurrent
-	 */
-	private static void displayWarningReminderPopup(Reminder reminderItem,
-			java.util.Calendar timeCurrent, MessageReminder msgReminder) {
-		if (reminderItem.getReminderType().equals(Reminder.TYPE_POPUP)) {
-			long minuteBeforeEventStarts = reminderItem.getAlarmBefore() * 60 * 1000;
-			Date timeBeforeEventStarts = new Date(reminderItem
-					.getFromDateTime().getTime() - minuteBeforeEventStarts);
+      List<CalendarEvent> events = calendarService.getPublicEvents(eventQuery);
+      for (CalendarEvent baseResultEvent : events) {
+        MessageReminder msgReminder = new MessageReminder();
 
-			Boolean before = timeCurrent.getTime().after(timeBeforeEventStarts);
-			Boolean after = timeCurrent.getTime().before(
-					reminderItem.getFromDateTime());
-			// if time alarm before < current time < time reminder, we display
-			// popup
-			if (before && after) {
-				log.debug("======= DISPLAY REMINDER POPUP=======");
-				log.debug(reminderItem.getDescription());
-				if (reminderItem.getFromDateTime() != null) {
-					msgReminder.setFromDate(reminderItem.getFromDateTime());
-					msgReminder.setToDate(new Date());
-					msgReminder.setDescription(reminderItem.getDescription());
-					msgReminder.setSummary(reminderItem.getSummary());
-					msgReminder.setRepeatIntervalMinute(reminderItem
-							.getRepeatInterval());
-				}
-			} else {
-				// if no reminder, we repeat algo after in
-				// REPEAT_INTERVAL_MINUTE
-			}
-		}
-	}
+        // if calendar event repeat, build a series of calendar linked
+        // to the first calendar, then check if current calendar (+-1h)
+        // have Maintenance event
+        if (Utils.isRepeatEvent(baseResultEvent)) {
+          Collection<CalendarEvent> calendarCollection = calendarService.buildSeries(baseResultEvent,
+                                                                                     timeCurrentBefore1Hour,
+                                                                                     timeCurrentAfter1Hour,
+                                                                                     username);
+          Iterator<CalendarEvent> iteratorCalendar = calendarCollection.iterator();
 
-	private static String getUserId(SecurityContext sc, UriInfo uriInfo) {
+          log.debug("=======REPEAT EVENT=======");
+          while (iteratorCalendar.hasNext()) {
+            CalendarEvent calendarRepeat = iteratorCalendar.next();
+            List<Reminder> listReminder = calendarRepeat.getReminders();
+            for (Reminder reminderItem : listReminder) {
+              reminderItem.setFromDateTime(baseResultEvent.getFromDateTime());
+              if (StringUtils.isEmpty(reminderItem.getDescription())) {
+                reminderItem.setDescription(calendarRepeat.getDescription());
+              }
+              displayWarningReminderPopup(reminderItem, currentTime, msgReminder);
+            }
+          }
+        }
+        /* if not repeat, check only event +-1h */
+        else {
+          log.debug("=======NOT REPEAT EVENT=======");
+          List<Reminder> listReminder = baseResultEvent.getReminders();
+          for (Reminder reminderItem : listReminder) {
+            reminderItem.setFromDateTime(baseResultEvent.getFromDateTime());
+            if (StringUtils.isEmpty(reminderItem.getDescription())) {
+              reminderItem.setDescription(baseResultEvent.getDescription());
+            }
+            displayWarningReminderPopup(reminderItem, currentTime, msgReminder);
+          }
+        }
+        listCommentMessages.add(msgReminder);
+      }
+      // update hashmap
+      mapReminderResult.put(getNameTenant(), listCommentMessages);
+      mapReminderTime.put(getNameTenant(), java.util.Calendar.getInstance());
+    } else {
+      log.debug("NO UPDATED--- at " + getNameTenant());
+    }
 
-		try {
-			return sc.getUserPrincipal().getName();
-		} catch (NullPointerException e) {
-			return getViewerId(uriInfo);
-		} catch (Exception e) {
-			return null;
-		}
-	}
+    return Response.ok(mapReminderResult.get(getNameTenant()), MediaType.APPLICATION_JSON).cacheControl(cacheControl).build();
+  }
 
-	private static String getViewerId(UriInfo uriInfo) {
+  /**
+   * display warning reminder popup if time alarm before < current time < time
+   * reminder then repeat after intervall minute
+   * 
+   * @param reminderItem reminder item of calendar event
+   * @param currentTime current time in server
+   * @param msgReminder reminder message that will be computed from two first parameters
+   */
+  private static void displayWarningReminderPopup(Reminder reminderItem,
+                                                  Date currentTime,
+                                                  MessageReminder msgReminder) {
+    if (reminderItem.getReminderType().equals(Reminder.TYPE_POPUP)) {
+      long minuteBeforeEventStarts = reminderItem.getAlarmBefore() * 60000;
+      Date fromDateTime = reminderItem.getFromDateTime();
 
-		URI uri = uriInfo.getRequestUri();
-		String requestString = uri.getQuery();
-		if (requestString == null) {
-			return null;
-		}
-		String[] queryParts = requestString.split("&");
+      Date timeBeforeEventStarts = new Date(fromDateTime.getTime() - minuteBeforeEventStarts);
 
-		for (String queryPart : queryParts) {
-			if (queryPart.startsWith("opensocial_viewer_id")) {
-				return queryPart.substring(queryPart.indexOf("=") + 1,
-						queryPart.length());
-			}
-		}
+      Boolean before = currentTime.after(timeBeforeEventStarts);
+      Boolean after = currentTime.before(fromDateTime);
+      // if time alarm before < current time < time reminder, we display
+      // popup
+      if (before && after) {
+        log.debug("======= DISPLAY REMINDER POPUP=======");
+        log.debug(reminderItem.getDescription());
+        msgReminder.setFromDate(fromDateTime);
+        msgReminder.setToDate(new Date());
+        msgReminder.setDescription(reminderItem.getDescription());
+        msgReminder.setSummary(reminderItem.getSummary());
+        msgReminder.setRepeatIntervalMinute(reminderItem.getRepeatInterval());
+      } else {
+        // if no reminder, we repeat algo after in
+        // REPEAT_INTERVAL_MINUTE
+      }
+    }
+  }
 
-		return null;
-	}
+  private static String getUserId(SecurityContext sc, UriInfo uriInfo) {
 
-	public class MessageReminder implements Comparable<MessageReminder> {
-		private String Summary;
-		private String Description;
-		private Date fromDate;
-		private Date toDate;
-		private long RepeatIntervalMinute;
+    try {
+      return sc.getUserPrincipal().getName();
+    } catch (NullPointerException e) {
+      return getViewerId(uriInfo);
+    } catch (Exception e) {
+      return null;
+    }
+  }
 
-		public String getSummary() {
-			return Summary;
-		}
+  private static String getViewerId(UriInfo uriInfo) {
 
-		public void setSummary(String summary) {
-			Summary = summary;
-		}
+    URI uri = uriInfo.getRequestUri();
+    String requestString = uri.getQuery();
+    if (requestString == null) {
+      return null;
+    }
+    String[] queryParts = requestString.split("&");
 
-		public String getDescription() {
-			return Description;
-		}
+    for (String queryPart : queryParts) {
+      if (queryPart.startsWith("opensocial_viewer_id")) {
+        return queryPart.substring(queryPart.indexOf("=") + 1, queryPart.length());
+      }
+    }
 
-		public void setDescription(String description) {
-			Description = description;
-		}
+    return null;
+  }
 
-		public Date getFromDate() {
-			return fromDate;
-		}
+  public class MessageReminder implements Comparable<MessageReminder> {
+    private String Summary;
 
-		public void setFromDate(Date fromDate) {
-			this.fromDate = fromDate;
-		}
+    private String Description;
 
-		public Date getToDate() {
-			return toDate;
-		}
+    private Date   fromDate;
 
-		public void setToDate(Date toDate) {
-			this.toDate = toDate;
-		}
+    private Date   toDate;
 
-		public long getRepeatIntervalMinute() {
-			return RepeatIntervalMinute;
-		}
+    private long   RepeatIntervalMinute;
 
-		public void setRepeatIntervalMinute(long repeatIntervalMinute) {
-			RepeatIntervalMinute = repeatIntervalMinute;
-		}
+    public String getSummary() {
+      return Summary;
+    }
 
-		@Override
-		public int compareTo(MessageReminder commentMessage) {
-			return this.fromDate.compareTo(commentMessage.getFromDate());
-		}
-	}
+    public void setSummary(String summary) {
+      Summary = summary;
+    }
 
-	/**
-	 * Update event list each tenant name has a list events TRUE if name tenant
-	 * is first search
-	 * 
-	 * @param list
-	 * @param timeLastes
-	 * @return
-	 * @throws RepositoryException
-	 */
-	public static boolean isRefreshResults(
-			Map<String, List<MessageReminder>> mapReminderResult,
-			Map<String, java.util.Calendar> mapReminderTime, String nameTenant)
-			throws RepositoryException {
-		// get current time base on timezone
-		java.util.Calendar timeCurrent = java.util.Calendar
-				.getInstance();
+    public String getDescription() {
+      return Description;
+    }
 
-		// Five Minutes delay, we substract 1000 miliseconds to sync with
-		// javascript
-		long FiveMinutes = 3 * 60 * 1000 - 1000;
+    public void setDescription(String description) {
+      Description = description;
+    }
 
-		if (mapReminderResult.get(getNameTenant()) == null) {
-			return true;
-		} else if (mapReminderResult.get(getNameTenant()).isEmpty()) {
-			return true;
-		} else if ((mapReminderResult.get(getNameTenant())
-				.get(mapReminderResult.get(getNameTenant()).size() - 1)
-				.getDescription() == null)) {
-			return true;
-		} else if (timeCurrent.getTimeInMillis()
-				- mapReminderTime.get(getNameTenant()).getTimeInMillis() > FiveMinutes) {
-			return true;
-		}
-		return false;
+    public Date getFromDate() {
+      return fromDate;
+    }
 
-	}
+    public void setFromDate(Date fromDate) {
+      this.fromDate = fromDate;
+    }
 
-	static String getNameTenant() throws RepositoryException {
-		RepositoryService repositoryService = CommonsUtils
-				.getService(RepositoryService.class);
-		ManageableRepository currentRepo = repositoryService
-				.getCurrentRepository();
-		return currentRepo.getConfiguration().getName();
-	}
+    public Date getToDate() {
+      return toDate;
+    }
+
+    public void setToDate(Date toDate) {
+      this.toDate = toDate;
+    }
+
+    public long getRepeatIntervalMinute() {
+      return RepeatIntervalMinute;
+    }
+
+    public void setRepeatIntervalMinute(long repeatIntervalMinute) {
+      RepeatIntervalMinute = repeatIntervalMinute;
+    }
+
+    @Override
+    public int compareTo(MessageReminder commentMessage) {
+      return this.fromDate.compareTo(commentMessage.getFromDate());
+    }
+  }
+
+  /**
+   * Update event list each tenant name has a list events TRUE if name tenant is
+   * first search
+   * 
+   * @param mapReminderResult : cached reminders
+   * @param mapReminderTime : cached reminders time
+   * @param nameTenant : container tenant name
+   * @return true if refresh is needed
+   * @throws RepositoryException if a JCR operation fails
+   */
+  public static boolean isRefreshResults(Map<String, List<MessageReminder>> mapReminderResult,
+                                         Map<String, java.util.Calendar> mapReminderTime,
+                                         String nameTenant) throws RepositoryException {
+    // get current time base on timezone
+    java.util.Calendar timeCurrent = java.util.Calendar.getInstance();
+
+    // Five Minutes delay, we substract 1000 miliseconds to sync with
+    // javascript
+    long FiveMinutes = 3 * 60 * 1000 - 1000;
+
+    if (mapReminderResult.get(getNameTenant()) == null) {
+      return true;
+    } else if (mapReminderResult.get(getNameTenant()).isEmpty()) {
+      return true;
+    } else if ((mapReminderResult.get(getNameTenant()).get(mapReminderResult.get(getNameTenant()).size() - 1).getDescription() == null)) {
+      return true;
+    } else if (timeCurrent.getTimeInMillis() - mapReminderTime.get(getNameTenant()).getTimeInMillis() > FiveMinutes) {
+      return true;
+    }
+    return false;
+
+  }
+
+  static String getNameTenant() throws RepositoryException {
+    RepositoryService repositoryService = CommonsUtils.getService(RepositoryService.class);
+    ManageableRepository currentRepo = repositoryService.getCurrentRepository();
+    return currentRepo.getConfiguration().getName();
+  }
 
 }
