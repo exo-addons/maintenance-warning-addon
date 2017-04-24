@@ -28,8 +28,6 @@
   </scm>
   <properties>
     <exoplatform.version>5.0.x-SNAPSHOT</exoplatform.version>
-    <org.exoplatform.core.version>2.5.11-GA</org.exoplatform.core.version>
-    <org.exoplatform.calendar.version>4.1.0</org.exoplatform.calendar.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -43,38 +41,7 @@
       </dependency>
 
       <!-- Import versions of core modules to use -->
-<!--
-      <dependency>
-        <groupId>org.exoplatform.core</groupId>
-        <artifactId>core-parent</artifactId>
-        <version>${org.exoplatform.core.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
--->
       <!-- Import versions from calendar project -->
- <!--
-      <dependency>
-        <groupId>org.exoplatform.calendar</groupId>
-        <artifactId>calendar</artifactId>
-        <version>${org.exoplatform.calendar.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>org.exoplatform.calendar</groupId>
-        <artifactId>calendar-webapp</artifactId>
-        <version>${org.exoplatform.calendar.version}</version>
-        <type>war</type>
-      </dependency>
-      <dependency>
-        <groupId>org.exoplatform.calendar</groupId>
-        <artifactId>calendar-webapp</artifactId>
-       <version>${org.exoplatform.calendar.version}</version>
-        <type>pom</type>
-      </dependency>
--->
     </dependencies>
   </dependencyManagement>
   <profiles>
