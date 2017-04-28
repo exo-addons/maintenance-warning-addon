@@ -16,7 +16,6 @@
   <description>Maintenance Warning Addons</description>
   <modules>
     <module>lib</module>
-    <module>config</module>
     <module>webapp</module>
     <module>bundle</module>
   </modules>
