@@ -14,7 +14,7 @@ public class ReminderServiceImpl implements Startable {
 	private static final Log log = ExoLogger
 			.getLogger(ReminderServiceImpl.class);
 	private Boolean isExistGroupMaintenance = false;
-	public static String nameCalendarMaintenance = "Maintenance";
+	public static String nameCalendarMaintenance = "Tribe Maintenance";
 
 	public ReminderServiceImpl() {
 	}
@@ -41,7 +41,7 @@ public class ReminderServiceImpl implements Startable {
 			}
 
 			/**
-			 * if no group maintenance, initialize Calendar Maintenance
+			 * if no group maintenance, initialize Calendar Tribe Maintenance
 			 */
 			if (!isExistGroupMaintenance) {
 				log.info("Create group calendar: " + nameCalendarMaintenance);
@@ -74,7 +74,7 @@ public class ReminderServiceImpl implements Startable {
 	private void initializeCalendarMaintenance(CalendarService calendarService,
 			Calendar calTempo, String nameCalendarMaintenance) throws Exception {
 		calTempo.setName(nameCalendarMaintenance);
-		calTempo.setDescription("Maintenance Event");
+		calTempo.setDescription("Tribe Maintenance Event");
 		calTempo.setPublic(true);
 		calTempo.setGroups(new String[] { "/platform/users" });
 		calTempo.setViewPermission(new String[] { "/platform/users/:*.*" });
