@@ -26,7 +26,7 @@
     <url>https://github.com/exo-addons/maintenance-warning-addon.git</url>
   </scm>
   <properties>
-    <org.exoplatform.platform.version>5.1.x-SNAPSHOT</org.exoplatform.platform.version>
+    <org.exoplatform.platform.version>5.1.0-M01</org.exoplatform.platform.version>
   </properties>
   <dependencyManagement>
     <dependencies>
